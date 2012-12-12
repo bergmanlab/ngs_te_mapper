@@ -954,15 +954,10 @@ GetSequences<-function (fastaFile, chrom, start,winLeft, winRigth, strand,  comp
 	return(as.list(internalVar))	
 }
 
-myA<-read.table("myFatA")
-myC<-read.table("myFatC")
-myG<-read.table("myFatG")
-myT<-read.table("myFatT")
-
-#myA<-read.table("Rcode/myFatA")
-#myC<-read.table("Rcode/myFatC")
-#myG<-read.table("Rcode/myFatG")
-#myT<-read.table("Rcode/myFatT")
+myA<-read.table("LogoA")
+myC<-read.table("LogoC")
+myG<-read.table("LogoG")
+myT<-read.table("LogoT")
 
 Logo <-function(matrix, maxScore=2, letterType = 2,title = "", start=1, weights = c(0.25,0.25,0.25,0.25), 
 		ytitle = "", xtitle = "", myAxis = TRUE, starting, ending, sites =0, bases, 
