@@ -1,8 +1,8 @@
-!/usr/bin/bash 
+#!/usr/bin/bash 
 
 #set up base directory for project 
 projectdir="$PWD"
-
+projectdir=$projectdit/example
 #set up directories for input and output files
 mkdir $projectdir/samples
 mkdir $projectdir/samples/fastq
@@ -30,15 +30,15 @@ mv VERSION9.4.1/D_mel_transposon_sequence_set.fasta.v9.4.1 $projectdir/reference
 rm -rf VERSION9.4.1*
 
 #copy (test) input files into ngs input directory
-cp sample.fasta $projectdir/samples/fasta/sample1.fasta
-cp sample.fasta $projectdir/samples/fasta/sample2.fasta
+cp example/sample.fasta $projectdir/samples/fasta/sample1.fasta
+cp example/sample.fasta $projectdir/samples/fasta/sample2.fasta
 
 #run ngs_te_mapper on all files ngs input directory
 for input in $projectdir/samples/fasta/*
 do 
 sample=`basename $input`
- R --no-save < ngs_te_mapper.R $sample $projectdir 1 20
+ R --no-save < source/ngs_te_mapper.R $sample $projectdir 1 20
 done
 
 
-R --no-save < ngs_te_logo.R $projectdir 25
+R --no-save < source/ngs_te_logo.R $projectdir 25

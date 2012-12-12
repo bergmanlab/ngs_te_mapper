@@ -7,6 +7,10 @@ Non-reference (aka de novo) TE insertions are detected using a two-stage process
 
 In the second stage, the unique (i.e. non-TE) components of junction reads identified in the first step are aligned against a reference genome. Genomic matchs are clustered and the region of overlap between sets of junction reads that span the start and end of the same reference TE are used to define the location and orientation of a non-reference TE insertions.
 
+To run the example do:
+	
+	bash sourceCode/run_ngs_te_mapper.sh
+	
 Dependencies
 ============
 
