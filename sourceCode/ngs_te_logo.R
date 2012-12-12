@@ -8,7 +8,8 @@ directory<-Args[[3]]
 seqWindow<-Args[[4]]
 
 logoFolder<-paste(directory, "/logo/", sep = "")
-inputFolder<-paste(directory, "/analysis/metadata/", sep = "")
+analysisFolder<-paste(directory, "/analysis/", sep = "")
+inputFolder<-paste(analysisFolder, "metadata/", sep = "")
 organism<-system(paste("ls ", directory, "/reference/genome", sep = ""), intern = TRUE)[1]
 organism<-paste(directory, "/reference/genome/", organism, sep = "")
 
@@ -27,7 +28,7 @@ cat(paste(teInsertionData[,1],teInsertionData[,2], teInsertionData[,3], teInsert
 	sep = "\n", file = myOutput)
 close(myOutput)
 
-aGraphName<-paste(analysisFolder, "allSamples.ps", sep = "")
+aGraphName<-paste(logoFolder, "allSamples.ps", sep = "")
 
 teNames<-names(table(teInsertionData[,6]))
 postscript(aGraphName, paper = 'a4', horizontal = TRUE);
