@@ -2,7 +2,7 @@
 
 #set up base directory for project 
 projectdir="$PWD"
-projectdir=$projectdit/example
+projectdir=$projectdir/example
 #set up directories for input and output files
 mkdir $projectdir/samples
 mkdir $projectdir/samples/fastq
