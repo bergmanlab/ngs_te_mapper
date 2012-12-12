@@ -8,7 +8,7 @@ directory<-Args[[3]]
 seqWindow<-Args[[4]]
 
 logoFolder<-paste(directory, "/logo/", sep = "")
-inputFolder<-paste(analysisFolder, "/analysis/metadata/", sep = "")
+inputFolder<-paste(directory, "/analysis/metadata/", sep = "")
 organism<-system(paste("ls ", directory, "/reference/genome", sep = ""), intern = TRUE)[1]
 organism<-paste(directory, "/reference/genome/", organism, sep = "")
 
