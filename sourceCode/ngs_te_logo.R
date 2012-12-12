@@ -12,7 +12,7 @@ inputFolder<-paste(directory, "/analysis/metadata/", sep = "")
 organism<-system(paste("ls ", directory, "/reference/genome", sep = ""), intern = TRUE)[1]
 organism<-paste(directory, "/reference/genome/", organism, sep = "")
 
-source("ngs_te_mapper_functions.R")
+source("sourceCode/ngs_te_mapper_functions.R")
 
 aFastaFile<-GetFasta(organism, sizeLocation = NA)		
 
