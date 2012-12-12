@@ -17,6 +17,7 @@ mkdir $projectdir/analysis/psl_genome
 mkdir $projectdir/analysis/bed_tsd
 mkdir $projectdir/analysis/metadata
 mkdir $projectdir/analysis/r_data_files
+mkdir $projectdir/logo
 
 #fetch and install reference genome
 wget ftp://ftp.flybase.net/releases/current/dmel_r5.48/fasta/dmel-all-chromosome-r5.48.fasta.gz
