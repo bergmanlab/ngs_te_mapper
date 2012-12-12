@@ -43,7 +43,7 @@ teFile<-paste(directory, "/reference/te/", teFile, sep = "")
 organism<-system(paste("ls ", directory, "/reference/genome", sep = ""), intern = TRUE)[1]
 organism<-paste(directory, "/reference/genome/", organism, sep = "")
 
-source("ngs_te_mapper_functions.R")
+source("sourceCode/ngs_te_mapper_functions.R")
 
 #align to the TE dataset
 system(paste(blatCommand, teFile, " ", fastaFile, " ", aligned, sep = ""))
