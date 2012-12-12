@@ -37,8 +37,8 @@ cp example/sample.fasta $projectdir/samples/fasta/sample2.fasta
 for input in $projectdir/samples/fasta/*
 do 
 sample=`basename $input`
- R --no-save < source/ngs_te_mapper.R $sample $projectdir 1 20
+ R --no-save < sourceCode/ngs_te_mapper.R $sample $projectdir 1 20
 done
 
 
-R --no-save < source/ngs_te_logo.R $projectdir 25
+R --no-save < sourceCode/ngs_te_logo.R $projectdir 25
