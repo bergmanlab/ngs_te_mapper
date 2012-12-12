@@ -39,3 +39,6 @@ do
 sample=`basename $input`
  R --no-save < ngs_te_mapper.R $sample $projectdir 1 20
 done
+
+
+R --no-save < ngs_te_logo.R $projectdir 25
