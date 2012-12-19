@@ -9,7 +9,9 @@ In the second stage, the unique (i.e. non-TE) components of junction reads ident
 
 An overview of the two-stage mapping procedure can be found in [figure 1](http://www.plosone.org/article/fetchObject.action?uri=info:doi/10.1371/journal.pone.0030008.g001&representation=PNG_M) Linheiro and Bergman (2012).
 
-In addition to the TE insertion site mapping code, we provide an R script (ngs_te_logo.R) that clusters TSDs from the same TE family and outputs a sequence logo describing the local nucleotide preferences in a windo around the TSD. We note that the current version of ngs_te_mapper does not filter for the modal TSD length, and thus gives slightly different results to those reported in Linheiro and Bergman (2012)
+In addition to the TE insertion site mapping code, we provide an R script (ngs_te_logo.R) that clusters TSDs from the same TE family and outputs a sequence logo describing the local nucleotide preferences in a window around the TSD (as in [figure 3](http://www.plosone.org/article/fetchObject.action?uri=info:doi/10.1371/journal.pone.0030008.g003&representation=PNG_M)). 
+
+We note that the current version of ngs_te_mapper does not filter for the modal TSD length, and thus gives slightly different results to those reported in Linheiro and Bergman (2012). We also note that, as described in [Linheiro and Bergman (2012) PLoS ONE 7(2): e30008](http://www.plosone.org/article/info%3Adoi%2F10.1371%2Fjournal.pone.0030008), the TSD logo method works best for TE families that generate fixed length TSDs (e.g. LTR retrotransposons and TIR transposons).
 
 To run the mapping and logo methods on an example fasta file, execute:
 	
