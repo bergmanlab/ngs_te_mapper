@@ -20,7 +20,7 @@ mkdir $projectdir/analysis/r_data_files
 mkdir $projectdir/logo
 
 #fetch and install reference genome
-wget ftp://ftp.flybase.net/releases/current/dmel_r5.48/fasta/dmel-all-chromosome-r5.48.fasta.gz
+wget ftp://ftp.flybase.net/releases/FB2012_06/dmel_r5.48/fasta/dmel-all-chromosome-r5.48.fasta.gz
 gunzip dmel-all-chromosome-r5.48.fasta.gz
 mv dmel-all-chromosome-r5.48.fasta $projectdir/reference/genome
 
