@@ -282,7 +282,8 @@ RightNewFasta<-function(selectedReads, fastaFile, outputFile, mid="middle", st="
 	{
 		if(substr(x, 1, 1) == ">")
 		{	
-			aMatch<-match(x,aNameSet)
+			tempo<-strsplit(x, split = " ")
+			aMatch<-match(tempo[[1]],aNameSet)
 			if(is.na(aMatch))
 			{
 				toWrite = FALSE
