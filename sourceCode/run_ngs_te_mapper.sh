@@ -20,9 +20,12 @@ mkdir $projectdir/analysis/r_data_files
 mkdir $projectdir/logo
 
 #fetch and install reference genome
-wget ftp://ftp.flybase.net/releases/FB2012_06/dmel_r5.48/fasta/dmel-all-chromosome-r5.48.fasta.gz
-gunzip dmel-all-chromosome-r5.48.fasta.gz
-mv dmel-all-chromosome-r5.48.fasta $projectdir/reference/genome
+wget ftp://hgdownload.soe.ucsc.edu/goldenPath/dm3/bigZips/chromFa.tar.gz
+tar -zxvf chromFa.tar.gz
+rm chromFa.tar.gz
+cat chrYHet.fa chrM.fa chr2L.fa chrX.fa chr3L.fa chr4.fa chr2R.fa chr3R.fa chrUextra.fa chr2RHet.fa chr2LHet.fa chr3LHet.fa chr3RHet.fa chrU.fa chrXHet.fa > dm3.fasta
+mv dm3.fasta $projectdir/reference/genome
+rm chrYHet.fa chrM.fa chr2L.fa chrX.fa chr3L.fa chr4.fa chr2R.fa chr3R.fa chrUextra.fa chr2RHet.fa chr2LHet.fa chr3LHet.fa chr3RHet.fa chrU.fa chrXHet.fa
 
 #fetch and install reference TE set
 wget http://www.fruitfly.org/data/p_disrupt/datasets/ASHBURNER/VERSION9.4.1.zip
@@ -31,8 +34,8 @@ mv VERSION9.4.1/D_mel_transposon_sequence_set.fasta.v9.4.1 $projectdir/reference
 rm -rf VERSION9.4.1*
 
 #copy (test) input files into ngs input directory
-cp example/sample.fasta $projectdir/samples/fasta/sample1.fasta
-cp example/sample.fasta $projectdir/samples/fasta/sample2.fasta
+cp example/sample1.fasta $projectdir/samples/fasta/sample1.fasta
+cp example/sample2.fasta $projectdir/samples/fasta/sample2.fasta
 
 #run ngs_te_mapper on all files ngs input directory
 for input in $projectdir/samples/fasta/*
