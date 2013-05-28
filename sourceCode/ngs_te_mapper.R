@@ -78,7 +78,10 @@ selectedReads<-SelectFirstReads(aPslFile)
 #right the reads to a new fasta file
 RightNewFasta(selectedReads, fastaFile, secondFastaFile )
 system(paste(blatCommand, organism, " ", secondFastaFile, " ", lastBlatFile))
-system(paste("rm ", fastaFile))
+if(length(files) >1)
+{
+	system(paste("rm ", fastaFile))
+}
 #select for the reads that are mapped to both the genome and the TE
 #allow for reads to be mapped to different sites by the number given from repeated
 otherPslFile<-GetPSL(lastBlatFile)
