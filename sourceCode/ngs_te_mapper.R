@@ -33,10 +33,10 @@ fastaFile<-paste(fastaFolder, sample, sep = "")
 aligned<-paste(firstAlignFolder, sample,".psl", sep= "" )
 secondFastaFile<-paste(secondFastaFolder,sample,".fasta", sep= "" )
 lastBlatFile<-paste(lastBlatFolder,sample,".psl", sep= "" )
-dataFile<-paste(dataFolder,sample, sep= "" )
+dataFile<-paste(dataFolder,sample, ".Rdata", sep= "" )
 bedFileReads<-paste(bedFolder, sample, "reads",sep = "")
-bedFileInsertions<-paste(bedFolder, sample, "insertions",sep = "")
-outputFile<-paste(outputFolder, sample, "insertions",sep = "")
+bedFileInsertions<-paste(bedFolder, sample, "insertions.bed",sep = "")
+outputFile<-paste(outputFolder, sample, "insertions.tsv",sep = "")
 
 teFile<-system(paste("ls ", directory, "/reference/te", sep = ""), intern = TRUE)[1]
 teFile<-paste(directory, "/reference/te/", teFile, sep = "")
