@@ -255,7 +255,7 @@ SelectFirstReads<-function(aPslFile, tolerated = 20, mid="middle", st="start", e
 					"% of the reads were ambigous in the match to the TE dataset", sep = ""))
 	aNameSet<-aNameSet[-toTake]
 	toKeep<-toKeep[-toTake]
-	internalVar$toKeep = toKeep
+	internalVar$toKeep = unlist(toKeep)
 	internalVar$aNameSet= aNameSet
 	return(as.list(internalVar))	
 }
@@ -283,7 +283,7 @@ RightNewFasta<-function(selectedReads, fastaFile, outputFile, mid="middle", st="
 		if(substr(x, 1, 1) == ">")
 		{	
 			tempo<-strsplit(x, split = " ")
-			aMatch<-match(tempo[[1]],aNameSet)
+			aMatch<-match(tempo[[1]][1],aNameSet)
 			if(is.na(aMatch))
 			{
 				toWrite = FALSE
@@ -1314,3 +1314,13 @@ Logo <-function(matrix, maxScore=2, letterType = 2,title = "", start=1, weights 
 	}	
 }
 
+RandomString <- function(n=1, lenght=10)
+{
+	randomString <- NULL
+	aBucket<-c(0:9, letters, LETTERS)
+	for (i in 1:n)
+	{
+		randomString[i]<-paste(sample(aBucket,lenght, replace=TRUE),collapse="")
+	}
+	return(randomString)
+}
