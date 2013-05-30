@@ -11,8 +11,21 @@ Args <- commandArgs();
 print(Args)
 sample<-Args[[3]]
 directory<-Args[[4]]
+if(length(Args) == 4)
+{
+	Args[[5]]<-1
+}
+if(length(Args) == 5)
+{
+	Args[[6]]<-20
+}
+if(length(Args) == 6)
+{
+	Args[[7]]<-20
+}
 repeated<-as.integer(Args[[5]])
-tsd<-as.integer(Args[[6]])
+tolerance<-as.integer(Args[[6]])
+tsd<-as.integer(Args[[7]])
 
 print(sample)
 print(directory)
@@ -73,7 +86,7 @@ system(paste(blatCommand, teFile, " ", fastaFile, " ", aligned, sep = ""))
 
 #select the reads that map uniquely to the end and start of the TE
 aPslFile<-GetPSL(aligned)
-selectedReads<-SelectFirstReads(aPslFile)
+selectedReads<-SelectFirstReads(aPslFile, tolerated =tolerance )
 
 #right the reads to a new fasta file
 RightNewFasta(selectedReads, fastaFile, secondFastaFile )
@@ -85,7 +98,7 @@ if(length(files) >1)
 #select for the reads that are mapped to both the genome and the TE
 #allow for reads to be mapped to different sites by the number given from repeated
 otherPslFile<-GetPSL(lastBlatFile)
-secondReads<-SelectSecondReads(otherPslFile, bedFileReads, withRep = repeated)
+secondReads<-SelectSecondReads(otherPslFile, bedFileReads, withRep = repeated, tolerated =tolerance )
 myLocations<-FinalProcessing(secondReads$toKeep,sample, tsd = tsd)
 myLocations2<-matrix(data = unlist(strsplit(myLocations, split = ";")), nrow= length(myLocations), byrow = TRUE)
 save(list = ls(), file =dataFile)
