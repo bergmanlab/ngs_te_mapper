@@ -246,15 +246,21 @@ SelectFirstReads<-function(aPslFile, tolerated = 20, mid="middle", st="start", e
 				}
 			}
 		}
-		toKeep[[i]]<-paste(toKeep[[i]], collapse = ",")
+		toKeep[i]<-paste(toKeep[[i]], collapse = ",")
 		position<-position+readTable[[i]]
 	}
 	internalVar<-new.env();
 	toTake<-which(toKeep == "NA")#those that are umbiguoes with the matching to a specific TE
 	print (paste(round(length(toTake)/length(toKeep), 5)*100  , 
 					"% of the reads were ambigous in the match to the TE dataset", sep = ""))
-	aNameSet<-aNameSet[-toTake]
-	toKeep<-toKeep[-toTake]
+	if(length(toTake) == 0)
+	{
+	}
+	else
+	{
+		aNameSet<-aNameSet[-toTake]
+		toKeep<-toKeep[-toTake]
+	}
 	internalVar$toKeep = unlist(toKeep)
 	internalVar$aNameSet= aNameSet
 	return(as.list(internalVar))	
