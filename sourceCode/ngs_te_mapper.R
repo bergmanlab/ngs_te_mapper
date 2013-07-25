@@ -14,10 +14,13 @@ directory<-Args[[4]]
 if(length(Args) == 4)
 {
 	Args[[5]]<-1
+	Args[[6]]<-20
+	Args[[7]]<-20
 }
 if(length(Args) == 5)
 {
 	Args[[6]]<-20
+	Args[[7]]<-20
 }
 if(length(Args) == 6)
 {
