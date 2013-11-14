@@ -1,0 +1,19 @@
+To cite ngs_te_mapper in publications, please use:
+ 
+  Linheiro, R.S. and C.M. Bergman (2012) Whole Genome Resequencing 
+  Reveals Natural Target Site Preferences of Transposable 
+  Elements in Drosophila melanogaster. PLoS ONE 7(2): e30008
+  http://www.plosone.org/article/info%3Adoi%2F10.1371%2Fjournal.pone.0030008
+ 
+A BibTeX entry for LaTeX users is
+
+ @article{linheiro2012whole,
+   title={Whole genome resequencing reveals natural target site preferences of transposable elements in Drosophila melanogaster},
+   author={Linheiro, Raquel S and Bergman, Casey M},
+   journal={PloS one},
+   volume={7},
+   number={2},
+   pages={e30008},
+   year={2012},
+   publisher={Public Library of Science}
+ }
