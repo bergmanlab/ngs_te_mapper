@@ -775,7 +775,7 @@ FinalProcessing<-function(secondReads, sample, tsd = 20, starts = "begin", ends 
 							}
 							else
 							{
-								tempEnd<-names(tableEnds)[t]
+#								tempEnd<-names(tableEnds)[t]
 								tempdistance<-distances[t]
 								tempEnds<-tableEnds[t]
 								selected<-which(tempEnd[,genomeLocation] == anEnd)
