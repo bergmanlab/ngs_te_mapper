@@ -751,11 +751,11 @@ FinalProcessing<-function(secondReads, sample, tsd = 20, starts = "begin", ends 
 					else
 					{
 						anEnd<-names(tableEnds)[1]
-						distance<-distances[1]
+						distance<-distances[selected[1]]
 						nEnds<-tableEnds[1]
 						selected<-which(tempEnd[,genomeLocation] == anEnd)
-						strandEnd<-tempEnd[selected,strand]
-						tePosEnd<-tempEnd[selected,tePlace]
+						strandEnd<-tempEnd[selected[1],strand]
+						tePosEnd<-tempEnd[selected[1],tePlace]
 						aStrand<-PredictStrand(nStarts,nEnds,strandStart,strandEnd, tePosStart,tePosEnd)
 						for(t in 2:length(names(tableEnds)))
 						{
@@ -766,28 +766,28 @@ FinalProcessing<-function(secondReads, sample, tsd = 20, starts = "begin", ends 
 							else if (nEnds < tableEnds[t])
 							{
 								anEnd<-names(tableEnds)[t]
-								distance<-distances[t]
 								nEnds<-tableEnds[t]
 								selected<-which(tempEnd[,genomeLocation] == anEnd)
+								distance<-distances[selected]
 								strandEnd<-tempEnd[selected,strand]
 								tePosEnd<-tempEnd[selected,tePlace]
 								aStrand<-PredictStrand(nStarts,nEnds,strandStart,strandEnd, tePosStart,tePosEnd)	
 							}
 							else
 							{
-#								tempEnd<-names(tableEnds)[t]
-								tempdistance<-distances[t]
+								tempAnEnd<-names(tableEnds)[t]
 								tempEnds<-tableEnds[t]
 								selected<-which(tempEnd[,genomeLocation] == anEnd)
 								strandEnd<-tempEnd[selected,strand]
 								tePosEnd<-tempEnd[selected,tePlace]
+								tempdistance<-distances[selected]
 								tempStrand<-PredictStrand(nStarts,nEnds,strandStart,strandEnd, tePosStart,tePosEnd)		
 								test<-which(is.na(c(tempStrand,aStrand)) == TRUE)
 								if ( length(test) == 1)
 								{
 									if(test == 2)
 									{
-										anEnd<-tempEnd
+										anEnd<-tempAnEnd
 										distance<-tempdistance
 										nEnds<-tempEnds
 										aStrand<-tempStrand
