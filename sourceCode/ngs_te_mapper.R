@@ -131,4 +131,7 @@ cat(paste(myLocations2[,1],myLocations2[,2], myLocations2[,3], myLocations2[,4],
 				myLocations2[,7],myLocations2[,8], myLocations2[,9], sep = "\t"), sep = "\n", file = myOutput)
 close(myOutput)
 
+cat("finished teh job and found ", length(myLocations), " new insertions run: \nR --no-save < sourceCode/ngs_te_logo.R ",
+		directory, " 25\nto get the logos centred at the TSD with +/- 25 bp to both sides\n")
 
+q(save = "no")
