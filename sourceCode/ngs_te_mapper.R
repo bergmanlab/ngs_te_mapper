@@ -1,4 +1,6 @@
-#R --no-save < ngs_te_mapper.R sample.fasta /Users/user_name/ngs_te_mapper 1 20
+#!/usr/bin/Rscript --vanilla --slave
+#chmod u+x ngs_te_mapper.R
+#./ngs_te_mapper.R sample.fasta /Users/user_name/ngs_te_mapper 1 20
 #align to the TEs first
 #then get the reads that match to a TE
 #align the selected reads to the genome of interest
@@ -6,36 +8,39 @@
 ###############################################################################
 
 
-Args <- commandArgs();
-
-print(Args)
-sample<-Args[[3]]
-directory<-Args[[4]]
+Args <- commandArgs(trailingOnly = TRUE);
+print(sessionInfo())
+cat("\n")
+#print(Args)
+sample<-Args[1]
+directory<-Args[2]
+if(length(Args) == 2)
+{
+	Args[3]<-1
+	Args[4]<-20
+	Args[5]<-20
+}
+if(length(Args) == 3)
+{
+	Args[4]<-20
+	Args[5]<-20
+}
 if(length(Args) == 4)
 {
-	Args[[5]]<-1
-	Args[[6]]<-20
-	Args[[7]]<-20
+	Args[5]<-20
 }
-if(length(Args) == 5)
-{
-	Args[[6]]<-20
-	Args[[7]]<-20
-}
-if(length(Args) == 6)
-{
-	Args[[7]]<-20
-}
-repeated<-as.integer(Args[[5]])
-tolerance<-as.integer(Args[[6]])
-tsd<-as.integer(Args[[7]])
+repeated<-as.integer(Args[3])
+tolerance<-as.integer(Args[4])
+tsd<-as.integer(Args[5])
 
-print(sample)
-print(directory)
+cat(paste("going to analysze: ",sample, "\n", "in to: ",directory,"\nwith \n\t",
+	"number of read matches in the genome: ",repeated,"\n", "\t", 
+	"proportion of missmatches: ",tolerance,"\n", "\t",
+	"maximum size of TSD: ", tsd, "\n", sep = ""))
 
 seqtekCo<-"seqtk fq2fa"
 blatCommand<-"blat "
-
+q(save = "no")
 #get the folders right
 analysisFolder<-paste(directory, "/analysis/", sep = "")
 fastaFolder<-paste(directory, "/samples/fasta/", sep = "")		
@@ -103,6 +108,15 @@ if(length(files) >1)
 otherPslFile<-GetPSL(lastBlatFile)
 secondReads<-SelectSecondReads(otherPslFile, bedFileReads, withRep = repeated, tolerated =tolerance )
 myLocations<-FinalProcessing(secondReads$toKeep,sample, tsd = tsd)
+
+if (length(myLocations) == 0)
+{
+	cat(paste("there were no new insertions found with the following criteria: ", "\n","\t",
+			"number of read matches in the genome: ", repeated,"\n", "\t", 
+			"proportion of missmatches: ",tolerance,"\n", "\t",
+			"maximum size of TSD: ", tsd, "\n", sep = ""))
+	q(save = "no")
+}
 myLocations2<-matrix(data = unlist(strsplit(myLocations, split = ";")), nrow= length(myLocations), byrow = TRUE)
 save(list = ls(), file =dataFile)
 
@@ -117,4 +131,4 @@ cat(paste(myLocations2[,1],myLocations2[,2], myLocations2[,3], myLocations2[,4],
 				myLocations2[,7],myLocations2[,8], myLocations2[,9], sep = "\t"), sep = "\n", file = myOutput)
 close(myOutput)
 
-q(save = "no")
+

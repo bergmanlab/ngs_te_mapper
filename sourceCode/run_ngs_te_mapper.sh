@@ -1,4 +1,4 @@
-#!/usr/bin/bash 
+    #!/usr/bin/bash 
 
 #set up base directory for project 
 projectdir="$PWD"
@@ -46,6 +46,9 @@ done
 
 #run ngs_te_mapper on different files has if it was only one sample (for paired end)
 #the names of the files have to be separated by ";"
-R --no-save < sourceCode/ngs_te_mapper.R "sample1.fasta;sample2.fasta" $projectdir 1 20 20
+
+chmod u+x ngs_te_mapper.R
+sourceCode/ngs_te_mapper.R "sample1.fasta;sample2.fasta" $projectdir 1 20 20
+#R --no-save < sourceCode/ngs_te_mapper.R "sample1.fasta;sample2.fasta" $projectdir 1 20 20
 
 R --no-save < sourceCode/ngs_te_logo.R $projectdir 25
