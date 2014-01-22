@@ -57,9 +57,19 @@ source("sourceCode/ngs_te_mapper_functions.R")
 files<-strsplit(sample, split =";")[[1]]
 if(length(files) == 1)
 {
-	fastaFile<-paste(fastaFolder, sample, sep = "")
-	sample<-strsplit(sample, split = "\\.")[[1]][1]
+	if(basename(sample) == sample)
+	{
+		#only the name of the file is given look for the file in the fasta folder
+		fastaFile<-paste(fastaFolder, sample, sep = "")
+		sample<-strsplit(sample, split = "\\.")[[1]][1]
+	}
+	else
+	{
+		fastaFile<-sample
+		sample<-unlist(strsplit(basename(sample), split = "\\."))[1]
+	}
 }
+
 if(length(files) >1)
 {
 	
@@ -68,9 +78,19 @@ if(length(files) >1)
 	fileName<-NULL
 	for ( i in 1:length(files))
 	{
-		fileName[i]<-strsplit(files[i], split = "\\.")[[1]][1]
-		cat(system(paste("sed 's/ .*/_", fileName[i], "/g' ",fastaFolder, files[i],
-						sep = ""), intern = TRUE), file = myOutput, sep = "\n")
+		if(basename(files[i]) == file[i])
+		{
+			#only the name of the file is given look for the file in the fasta folder
+			fileName[i]<-strsplit(files[i], split = "\\.")[[1]][1]
+			cat(system(paste("sed 's/ .*/_", fileName[i], "/g' ",fastaFolder, files[i],
+				sep = ""), intern = TRUE), file = myOutput, sep = "\n")
+		}
+		else
+		{
+			fileName[i]<-strsplit(basename(files[i]), split = "\\.")[[1]][1]
+			cat(system(paste("sed 's/ .*/_", fileName[i], "/g' ", files[i],	sep = ""), 
+				intern = TRUE), file = myOutput, sep = "\n")
+		}
 	}
 	close(myOutput)	
 	sample<-paste(fileName, collapse = "_")
