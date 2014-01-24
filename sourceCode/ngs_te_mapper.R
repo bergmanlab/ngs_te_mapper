@@ -8,33 +8,34 @@
 ###############################################################################
 
 
-Args <- commandArgs(trailingOnly = TRUE);
+Args <- commandArgs();
+toAddArgs<-2
 print(sessionInfo())
 cat("\n")
-#print(Args)
-sample<-Args[1]
-directory<-Args[2]
-if(length(Args) == 2)
+print(Args)
+sample<-Args[1+toAddArgs]
+directory<-Args[2+toAddArgs]
+if(length(Args) == (2+toAddArgs))
 {
-	Args[3]<-1
-	Args[4]<-20
-	Args[5]<-20
+	Args[3+toAddArgs]<-1
+	Args[4+toAddArgs]<-20
+	Args[5+toAddArgs]<-20
 }
-if(length(Args) == 3)
+if(length(Args) == (3+toAddArgs))
 {
-	Args[4]<-20
-	Args[5]<-20
+	Args[4+toAddArgs]<-20
+	Args[5+toAddArgs]<-20
 }
-if(length(Args) == 4)
+if(length(Args) == (4+toAddArgs))
 {
-	Args[5]<-20
+	Args[5+toAddArgs]<-20
 }
-repeated<-as.integer(Args[3])
-tolerance<-as.integer(Args[4])
-tsd<-as.integer(Args[5])
+repeated<-as.integer(Args[3+toAddArgs])
+tolerance<-as.integer(Args[4+toAddArgs])
+tsd<-as.integer(Args[5+toAddArgs])
 
 cat(paste("going to analysze: ",sample, "\n", "in to: ",directory,"\nwith \n\t",
-	"number of read matches in the genome: ",repeated,"\n", "\t", 
+	"number of matches per read in the genome: ",repeated,"\n", "\t", 
 	"proportion of missmatches: ",tolerance,"\n", "\t",
 	"maximum size of TSD: ", tsd, "\n", sep = ""))
 
@@ -132,7 +133,7 @@ myLocations<-FinalProcessing(secondReads$toKeep,sample, tsd = tsd)
 if (length(myLocations) == 0)
 {
 	cat(paste("there were no new insertions found with the following criteria: ", "\n","\t",
-			"number of read matches in the genome: ", repeated,"\n", "\t", 
+			"number of matches per read in the genome: ", repeated,"\n", "\t", 
 			"proportion of missmatches: ",tolerance,"\n", "\t",
 			"maximum size of TSD: ", tsd, "\n", sep = ""))
 	q(save = "no")
