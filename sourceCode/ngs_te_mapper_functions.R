@@ -471,16 +471,16 @@ SelectSecondReads<-function(aPslFile, bedFile, tolerated = 20, sizeTolerance = 2
 		}
 		position<-position+readIds[[i]]
 	}
-	readNameToKeep<-readName[- toTake]
-	toTake<-which(is.na(toKeep) == TRUE)
-	readNameToKeep<-readNameToKeep
+	readNameToKeep<-readName
 	toKeep<-unlist(strsplit(toKeep, split = idSplit))
+	toTake<-which(is.na(toKeep) == TRUE)
 	#those that are umbiguoes with the matching to a specific TE
 	print (paste(round(length(toTake)/length(toKeep), 5)*100  , 
 					"% of the ambigous matching to the genome", sep = ""))
 	if(length(toTake)>0)
 	{
 		toKeep<-toKeep[- toTake]
+		readNameToKeep<-readNameToKeep[- toTake]
 	}
 	if(missing(bedFile)){
 		
