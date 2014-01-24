@@ -40,7 +40,7 @@ cat(paste("going to analysze: ",sample, "\n", "in to: ",directory,"\nwith \n\t",
 
 seqtekCo<-"seqtk fq2fa"
 blatCommand<-"blat "
-q(save = "no")
+#q(save = "no")
 #get the folders right
 analysisFolder<-paste(directory, "/analysis/", sep = "")
 fastaFolder<-paste(directory, "/samples/fasta/", sep = "")		
