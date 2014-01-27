@@ -81,7 +81,6 @@ if(length(files) >1)
 	{
 		if(basename(files[i]) == files[i])
 		{
-			print("hello")
 			#only the name of the file is given look for the file in the fasta folder
 			fileName[i]<-strsplit(files[i], split = "\\.")[[1]][1]
 			cat(system(paste("sed 's/ .*/_", fileName[i], "/g' ",fastaFolder, files[i],
