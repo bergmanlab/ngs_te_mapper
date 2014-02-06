@@ -41,6 +41,11 @@ cat(paste("going to analysze: ",sample, "\n", "in to: ",directory,"\nwith \n\t",
 
 seqtekCo<-"seqtk fq2fa"
 blatCommand<-"blat "
+bwaCommand<-"bwa mem "
+bwaIndex<-"bwa index -p "
+
+
+
 #q(save = "no")
 #get the folders right
 analysisFolder<-paste(directory, "/analysis/", sep = "")
@@ -96,39 +101,84 @@ if(length(files) >1)
 	close(myOutput)	
 	sample<-paste(fileName, collapse = "_")
 }
-aligned<-paste(firstAlignFolder, sample,".psl", sep= "" )
+aligned<-paste(firstAlignFolder, sample, sep= "" )
 secondFastaFile<-paste(secondFastaFolder,sample,".fasta", sep= "" )
-lastBlatFile<-paste(lastBlatFolder,sample,".psl", sep= "" )
+lastBlatFile<-paste(lastBlatFolder,sample, sep= "" )
 dataFile<-paste(dataFolder,sample, ".Rdata", sep= "" )
 bedFileReads<-paste(bedFolder, sample, "reads",sep = "")
 bedFileInsertions<-paste(bedFolder, sample, "insertions.bed",sep = "")
 outputFile<-paste(outputFolder, sample, "insertions.tsv",sep = "")
 
-teFile<-system(paste("ls ", directory, "/reference/te", sep = ""), intern = TRUE)[1]
+teFile<-system(paste("ls -rt ", directory, "/reference/te", sep = ""), intern = TRUE)[1]
 teFile<-paste(directory, "/reference/te/", teFile, sep = "")
 organism<-system(paste("ls ", directory, "/reference/genome", sep = ""), intern = TRUE)[1]
 organism<-paste(directory, "/reference/genome/", organism, sep = "")
 
+referenceTE<-unlist(strsplit(teFile, split = "\\."))[1]
+if( teFile != paste(referenceTE, ".fasta", sep =""))
+{
+	system(paste("mv ", teFile, " ",referenceTE, ".fasta", sep = ""))
+	teFile<-paste(referenceTE, ".fasta", sep = "")
+}
+aList<-system(paste("ls -rt ", directory, "/reference/te", sep = ""), intern = TRUE)
+if (length(grep(paste(directory, "/reference/te/",referenceTE, ".bwt", sep = ""), aList)) == 0 | 
+		length(grep(paste(directory, "/reference/te/",referenceTE, ".bwt", sep = ""), aList)) == 0 )
+{
+	print("getting the bwa index for the TE set")
+	system(paste( bwaIndex, referenceTE, teFile, sep = " "))	
+}
+
+referenceGenome<-unlist(strsplit(organism, split = "\\."))[1]
+if(organism!= paste(referenceGenome, ".fasta", sep =""))
+{
+	system(paste("mv ", organism, " ",referenceGenome, ".fasta", sep = ""))
+	organism<-paste(referenceGenome, ".fasta", sep = "")
+}
+aList<-system(paste("ls -rt ", directory, "/reference/genome/", sep = ""), intern = TRUE)
+if (length(grep(paste(directory, "/reference/genome/",referenceGenome, ".bwt", sep = ""), aList)) == 0 | 
+		length(grep(paste(directory, "/reference/genome/",referenceGenome, ".bwt", sep = ""), aList)) == 0 )
+{
+	print("getting the bwa index for the Genome")
+	system(paste( bwaIndex, referenceGenome, organism, sep = " "))	
+}
+
 
 #align to the TE dataset
-system(paste(blatCommand, teFile, " ", fastaFile, " ", aligned, sep = ""))
+system(paste(blatCommand, teFile, " ", fastaFile, " ", aligned,".psl", sep = ""))
+
+system(paste(bwaCommand, referenceTE, " ", fastaFile, " >", aligned,".sam" ,sep = ""))
 
 #select the reads that map uniquely to the end and start of the TE
-aPslFile<-GetPSL(aligned)
-selectedReads<-SelectFirstReads(aPslFile, tolerated =tolerance )
+#aPslFile<-GetPSL(paste(aligned, ".psl", sep = ""))
+#selectedReads<-SelectFirstReads(aPslFile, tolerated =tolerance )
+
+aSamFile<-GetSamFile(paste(aligned,".sam", sep = ""))
+selectedReads<-SelectFirstReadsSam(aSamFile, tolerated =tolerance ,secondFastaFile = secondFastaFile )
 
 #right the reads to a new fasta file
 RightNewFasta(selectedReads, fastaFile, secondFastaFile )
-system(paste(blatCommand, organism, " ", secondFastaFile, " ", lastBlatFile))
+system(paste(blatCommand, organism, " ", secondFastaFile, " ", lastBlatFile, ".psl"))
+
+system(paste(bwaCommand, referenceGenome, " ", secondFastaFile, " >", lastBlatFile,".sam" ,sep = ""))
+
+
 if(length(files) >1)
 {
 	system(paste("rm ", fastaFile))
 }
 #select for the reads that are mapped to both the genome and the TE
 #allow for reads to be mapped to different sites by the number given from repeated
-otherPslFile<-GetPSL(lastBlatFile)
+otherPslFile<-GetPSL(paste(lastBlatFile, ".psl", sep = ""))
 secondReads<-SelectSecondReads(otherPslFile, bedFileReads, withRep = repeated, tolerated =tolerance )
 myLocations<-FinalProcessing(secondReads$toKeep,sample, tsd = tsd)
+
+
+otherSamFile<-GetSamFile(paste(lastBlatFile, ".sam", sep = ""))
+secondReads<-SelectSecondReadsSam(otherSamFile, bedFileReads, withRep = repeated, tolerated =tolerance )
+myLocations<-FinalProcessing(secondReads$toKeep,sample, tsd = tsd)
+
+
+
 
 if (length(myLocations) == 0)
 {

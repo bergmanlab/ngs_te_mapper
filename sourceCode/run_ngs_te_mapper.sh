@@ -50,3 +50,7 @@ done
 R --no-save < sourceCode/ngs_te_mapper.R "sample1.fasta;sample2.fasta" $projectdir 1 20 20
 
 R --no-save < sourceCode/ngs_te_logo.R $projectdir 25
+
+
+
+Args<-unlist(strsplit('sample1.fasta;sample2.fasta example/ 1 20 20', split = " "))
