@@ -1,11 +1,9 @@
-#!/usr/bin/Rscript --vanilla --slave
+#!/usr/bin/Rscript --vanilla 
 # chmod u+x functions.R
 # 1:00:56 PM
 # TODO: Add comment 
 # Author: raquel
 ###############################################################################
-
-
 
 GetPSL<-function(file, fields="all", fieldNames = c("match", "mismatch", "repmatch", "NCount", 
 				"QgapCount", "QgapBases", "TgapCount", "TgapBases", "strand", "Qname", "Qsize", 
@@ -30,76 +28,6 @@ GetPSL<-function(file, fields="all", fieldNames = c("match", "mismatch", "repmat
 		}
 	}
 	return(as.list(internalVar));	
-}
-
-GetSamFile<-function(file, fieldNames=c("QNAME","FLAG",
-				"RNAME","POS","MAPQ","CIGAR","RNEXT","PNEXT","TLEN","SEQ","QUAL","TAGS"),fieldTypesNoTags = c("character()", 
-				"integer()","character()","integer()","integer()","character()","character()","integer()",
-				"integer()","character()", "character()", "character()") , toSep=";")
-{
-	afile<-scan(file,what=character(), sep = "\n", quote = "",comment.char="")
-	select<-grep("^@SQ", afile)
-	allLength<-vector("list",length(select) )
-	temp<-afile[select]
-	temp<-strsplit(gsub(":", "\t" , temp), split = "\t")
-	startPos<-ListStartPositions(temp)
-	temp<-unlist(temp)
-	allLength$names<-temp[startPos+2]
-	allLength$length<-temp[startPos+4]
-	afile<-afile[-select] #to take the comments about the sequences on the top
-	afile<-(strsplit(afile, split= "\t"))
-	aLength<-length(fieldNames)
-	aList<-vector("list", aLength)
-	unlistedFile<-unlist(afile)
-	for ( i in 1:(aLength-1))
-	{
-		aList[[i]]<-unlistedFile[(ListStartPositions(afile) +i -1)]
-	}
-	lengths<-unlist(lapply(afile, length))-1
-	extraTags<-as.numeric(names(table(lengths)))
-	i<-1
-	tempo<-unlistedFile[(ListStartPositions(afile)+ extraTags[i] -1)]
-	tempo[which(lengths<extraTags[i])]<-"NA"
-	aList[[aLength]]<-tempo
-	for ( i in 2:length(extraTags))
-	{
-		tempo<-unlistedFile[(ListStartPositions(afile)+ extraTags[i] -1)]
-		tempo[which(lengths<extraTags[i])]<-"NA"
-		aList[[aLength]]<-paste(aList[[aLength]],tempo, sep = "_" )
-	}
-	intOnes<-which(fieldTypesNoTags == "integer()")
-	charOnes<-which(fieldTypesNoTags == "character()")
-	#to leave the tags out of the system
-	for ( i in intOnes)
-	{
-		aList[[i]]<-as.integer(aList[[i]])
-	}
-	names(aList)<-fieldNames
-	aList$names<-allLength$names
-	aList$length<-allLength$length
-	return(aList);	
-#	Col Field Type
-#	1 QNAME String
-#	2 FLAG Int
-#	3 RNAME String
-#	4 POS Int
-#	5 MAPQ Int
-#	6 CIGAR String
-#	7 RNEXT String
-#	8 PNEXT Int
-#	9 TLEN Int
-#	10 SEQ String
-#	11 QUAL String  ASCII of Phred-scaled base QUALity+33
-#these are the CIGAR string meanings	
-#M 0 alignment match (can be a sequence match or mismatch) 
-#I 1 insertion to the reference
-#D 2 deletion from the reference
-#N 3 skipped region from the reference
-#S 4 soft clipping (clipped sequences present in SEQ)
-#H 5 hard clipping (clipped sequences NOT present in SEQ)
-#P 6 padding (silent deletion from padded reference)
-#= 7 sequence match
-#X 8 sequence mismatch
 }
 
 #only compare the quality matchsize and blockcount
@@ -336,58 +264,6 @@ SelectFirstReads<-function(aPslFile, tolerated = 20, mid="middle", st="start", e
 	return(as.list(internalVar))	
 }
 
-SelectFirstReadsSam<-function(aSamFile, tolerated = 20, st="start", en="end", secondFastaFile)
-{
-	asc <- function(x) 
-	{ 
-		strtoi(charToRaw(x),16L) 
-	}
-	readQualitScore<-unlist(lapply(lapply(aSamFile$QUAL, asc), sum))
-	if(length(names(table(readQualitScore)))> 1)
-	{
-		#for latter	
-	}
-	let<-unlist(lapply(strsplit(aSamFile$CIGAR, split ="\\d+", perl = TRUE), paste, collapse = ""))
-	toKeep<-which(let == "MS" | let =="SM") #only selct for the 
-	let<-let[toKeep]
-	for ( i in 1:(length(aSamFile)-2))
-	{
-		aSamFile[[i]]<-aSamFile[[i]][toKeep]
-	}
-	tolerance = 3*tolerated
-	toTake<-c(which(aSamFile$MAPQ > tolerance))
-	if(length(toTake) == 0)
-	{
-	}
-	else
-	{	
-		let<-let[-toTake]
-		for ( i in 1:(length(aSamFile)-2))
-		{
-			aSamFile[[i]]<-aSamFile[[i]][-toTake]
-		}
-	}
-	num<-strsplit(aSamFile$CIGAR, split ="\\D+", perl = TRUE)
-	matchsize<-NULL
-	difference<-NULL
-	sel<-which(let == "MS")
-	matchsize[sel]<-as.numeric(unlist(num[sel])[ListStartPositions(num[sel])])
-	difference[sel]<-as.numeric(unlist(num[sel])[ListStartPositions(num[sel])+1])
-	sel<-which(let == "SM")
-	matchsize[sel]<-as.numeric(unlist(num[sel])[ListStartPositions(num[sel])+1])
-	difference[sel]<-as.numeric(unlist(num[sel])[ListStartPositions(num[sel])])
-	
-	TELength<-as.numeric(aSamFile$length[match(aSamFile$RNAME , aSamFile$names)])
-	location<-rep(NA, length(aSamFile[[1]]))
-	location[which(aSamFile$POS == 1)]<-st
-	location[which((aSamFile$POS +matchsize -1) == TELength )]<-en
-	
-	id<-paste(aSamFile$QNAME,aSamFile$RNAME ,matchsize, difference, let, location, sep =",")
-	myOut<-file(secondFastaFile, "w")
-	cat(paste(">", id, "\n", aSamFile$SEQ, sep = ""), sep = "\n", file = myOut)
-	close(myOut)
-}
-
 RightNewFasta<-function(selectedReads, fastaFile, outputFile, mid="middle", st="start", en="end", noMid=TRUE)
 {
 	aFile<-file(fastaFile, open = "r")
@@ -441,196 +317,8 @@ RightNewFasta<-function(selectedReads, fastaFile, outputFile, mid="middle", st="
 	close(myOutput)
 }
 
-SelectSecondReads<-function(aPslFile, bedFile, tolerated = 20, sizeTolerance = 20, st="start", en="end",
-		strands=c("+", "-"), idSplit=",", withRep  = 1, pasteChar = ";")
-{
-	aPslFile<-data.frame(aPslFile)
-	newId<-strsplit(as.character(aPslFile$Qname), split = idSplit)
-	newId<-matrix(unlist(newId), byrow = TRUE, nrow = length(newId))
-	#select only for those that the full length of the TE non mapped sequence
-	readId<-1
-	tName<-2
-	location<-3
-	strand<-4
-	blockCount<-5
-	qual<-6
-	match<-7
-	qStart<-8
-	qSize<-9
-	diff<-10
-	#1
-	totalGap = aPslFile$QgapBases + aPslFile$TgapBases;
-	totalMiss = aPslFile$mismatch + aPslFile$repmatch + aPslFile$NCount;
-	quality = totalGap +  totalMiss;
-	matchsize = aPslFile$Qend - aPslFile$Qstart;
-	tolerance = matchsize/tolerated
-	toTake<-which((newId[,qSize] != aPslFile$Qsize) | (quality > tolerance))
-	if(length(toTake) == 0)
-	{
-	}
-	else
-	{	
-		newId<-newId[- toTake,]
-		aPslFile<-aPslFile[- toTake, ]
-		tolerance<-tolerance[- toTake]
-		quality<-quality[- toTake]
-	}
-	#2
-	temp<-unlist(strsplit(newId[,qStart], split = "-"))
-	aStart<-temp[seq(1, 2*length(newId[,qStart]), 2)]
-	anEnd<-temp[seq(2, 2*length(newId[,qStart]), 2)]
-	toTake<-which((aPslFile$Qend != aStart) & (aPslFile$Qstart != anEnd))
-	if(length(toTake) == 0)
-	{
-	}
-	else
-	{	
-		newId<-newId[- toTake,]
-		aPslFile<-aPslFile[- toTake, ]
-		aStart<-aStart[- toTake]
-		anEnd<-anEnd[- toTake]
-		tolerance<-tolerance[- toTake]
-		quality<-quality[- toTake]
-	}
-	#3
-	sizeTolerated<-aPslFile$Qsize/sizeTolerance
-	aStart<-as.numeric(aStart)
-	anEnd<-as.numeric(anEnd)
-	difference<-aPslFile$Qsize - anEnd + aStart + aPslFile$Qstart - aPslFile$Qend
-	toTake<-which((difference-1) > sizeTolerated)
-	if(length(toTake) == 0)
-	{
-	}
-	else
-	{	
-		newId<-newId[- toTake,]
-		aPslFile<-aPslFile[- toTake, ]
-		aStart<-aStart[- toTake]
-		anEnd<-anEnd[- toTake]
-		tolerance<-tolerance[- toTake]
-		difference<-difference[- toTake]
-		quality<-quality[- toTake]
-	}
-	#4
-	toTake<-which(difference <0)
-	if(length(toTake) == 0)
-	{
-	}
-	else
-	{	
-		print(aPslFile[toTake, ])
-		newId<-newId[-toTake,]
-		aPslFile<-aPslFile[- toTake, ]
-		aStart[-toTake]
-		anEnd[-toTake]
-		tolerance<-tolerance[-toTake]
-		quality<-quality[-toTake]
-	}
-	#5
-	toTake<-which(aPslFile$blockCount >1 & aPslFile$blockCount >tolerance)
-	if(length(toTake) == 0)
-	{
-	}
-	else
-	{	
-		newId<-newId[-toTake,]
-		aPslFile<-aPslFile[- toTake, ]
-		aStart<-aStart[- toTake]
-		anEnd<-anEnd[- toTake]
-		quality<-quality[-toTake]
-	}
-	#6
-	toTake<-which(aPslFile$Qsize  != anEnd & aStart !=0 & aPslFile$Qend != aPslFile$Qsize & aPslFile$Qstart !=0 )
-	if(length(toTake) == 0)
-	{
-	}
-	else
-	{	
-		newId<-newId[-toTake,]
-		aPslFile<-aPslFile[- toTake, ]
-		aStart<-aStart[- toTake]
-		anEnd<-anEnd[- toTake]
-		quality<-quality[-toTake]
-	}
-	readIds<-table(newId[,readId])
-	anOrder<-order(newId[,readId])
-	predictedStrand<-rep(NA, length(aPslFile$strand))
-	predictedStrand[which(aPslFile$strand == newId[,strand])]<-strands[1]
-	predictedStrand[which(aPslFile$strand != newId[,strand])]<-strands[2]
-	finalId<-paste(aPslFile$Tname, aPslFile$Tstart,  aPslFile$Tend, predictedStrand, newId[,tName],newId[,location], 
-			sep = pasteChar)
-	finalId<-finalId[anOrder]
-	quality<-quality[anOrder]
-	readName<-names(readIds)
-	toKeep<-NULL
-	position<-1
-	for ( i in 1:length(readName))
-	{
-		if(readIds[[i]] == 1)
-		{
-			#print(finalId[position])
-			toKeep[i]<-finalId[position]
-		}
-		else
-		{
-			positions<-seq(position,(position + readIds[[i]] -1), 1)
-			test1<-quality[positions]
-			tempo<-which(test1 == min(test1))
-			if(length(tempo) >1)
-			{
-				if((test1[tempo[1]] == 0) & length(tempo) <= withRep)
-				{
-					tempo<-tempo-1 +position
-					toKeep[i]<-paste(finalId[tempo], sep = idSplit)
-				}
-				else{
-					toKeep[i]<-"NA"
-				}
-			}
-			else
-			{
-				toKeep[i]<-finalId[position+tempo-1]
-			}
-		}
-		position<-position+readIds[[i]]
-	}
-	readNameToKeep<-readName
-	toKeep<-unlist(strsplit(toKeep, split = idSplit))
-	toTake<-which(toKeep == "NA")
-	#those that are umbiguoes with the matching to a specific TE
-	print (paste(round(length(toTake)/length(toKeep), 5)*100  , 
-					"% of reads have ambigous matching to the genome", sep = ""))
-	if(length(toTake)>0)
-	{
-		toKeep<-toKeep[- toTake]
-		readNameToKeep<-readNameToKeep[- toTake]
-	}
-	if(missing(bedFile)){
-		
-		internalVar<-new.env();
-		internalVar$toKeep<-toKeep
-		internalVar$readId<-readNameToKeep
-		return(as.list(internalVar));	
-	}
-	else
-	{
-		myOutput<-file(bedFile, "w")
-		aMat<-matrix(unlist(strsplit(toKeep, split = pasteChar)), nrow = length(toKeep), byrow = TRUE)
-		chrom<-1
-		start<-2
-		end<-3
-		bedID<-paste(readNameToKeep, toKeep, sep = ";")
-		cat(paste(aMat[,1],aMat[,2], aMat[,3],bedID,sep = "\t"), sep = "\n", file = myOutput)
-		close(myOutput)
-		internalVar<-new.env();
-		internalVar$toKeep<-toKeep
-		internalVar$readId<-readNameToKeep
-		return(as.list(internalVar));	
-	}
-	
-}
 
-SelectSecondReadsSam<-function(aPslFile, bedFile, tolerated = 20, sizeTolerance = 20, mid="middle", 
+SelectSecondReads<-function(aPslFile, bedFile, tolerated = 20, sizeTolerance = 20, mid="middle", 
 		st="start", en="end", strands=c("+", "-"), idSplit=",", withRep  = 1, pasteChar = ";")
 {
 	aPslFile<-data.frame(aPslFile)
@@ -818,8 +506,6 @@ SelectSecondReadsSam<-function(aPslFile, bedFile, tolerated = 20, sizeTolerance 
 	}
 	
 }
-
-
 
 PredictStrand<-function(nstarts,nends,strandStart,strandEnd, tePosStart,tePosEnd, decision = c("start", "end"))
 {	
@@ -1130,6 +816,390 @@ FinalProcessing<-function(secondReads, sample, tsd = 20, starts = "begin", ends 
 				}
 				position<-position+tablestarts[[s]]
 			}
+		}
+	}
+	return(readPairs)
+}
+
+################
+################
+################
+################
+GetSamFile<-function(file, fieldNames=c("QNAME","FLAG",
+				"RNAME","POS","MAPQ","CIGAR","RNEXT","PNEXT","TLEN","SEQ","QUAL","TAGS"),fieldTypesNoTags = c("character()", 
+				"integer()","character()","integer()","integer()","character()","character()","integer()",
+				"integer()","character()", "character()", "character()") , toSep=";")
+{
+	afile<-scan(file,what=character(), sep = "\n", quote = "",comment.char="")
+	select<-grep("^@SQ", afile)
+	allLength<-vector("list",length(select) )
+	temp<-afile[select]
+	temp<-strsplit(gsub(":", "\t" , temp), split = "\t")
+	startPos<-ListStartPositions(temp)
+	temp<-unlist(temp)
+	allLength$names<-temp[startPos+2]
+	allLength$length<-temp[startPos+4]
+	afile<-afile[-select] #to take the comments about the sequences on the top
+	afile<-(strsplit(afile, split= "\t"))
+	aLength<-length(fieldNames)
+	aList<-vector("list", aLength)
+	unlistedFile<-unlist(afile)
+	for ( i in 1:(aLength-1))
+	{
+		aList[[i]]<-unlistedFile[(ListStartPositions(afile) +i -1)]
+	}
+	lengths<-unlist(lapply(afile, length))-1
+	extraTags<-as.numeric(names(table(lengths)))
+	i<-1
+	tempo<-unlistedFile[(ListStartPositions(afile)+ extraTags[i] -1)]
+	tempo[which(lengths<extraTags[i])]<-"NA"
+	aList[[aLength]]<-tempo
+	for ( i in 2:length(extraTags))
+	{
+		tempo<-unlistedFile[(ListStartPositions(afile)+ extraTags[i] -1)]
+		tempo[which(lengths<extraTags[i])]<-"NA"
+		aList[[aLength]]<-paste(aList[[aLength]],tempo, sep = "_" )
+	}
+	intOnes<-which(fieldTypesNoTags == "integer()")
+	charOnes<-which(fieldTypesNoTags == "character()")
+	#to leave the tags out of the system
+	for ( i in intOnes)
+	{
+		aList[[i]]<-as.integer(aList[[i]])
+	}
+	names(aList)<-fieldNames
+	aList$names<-allLength$names
+	aList$length<-allLength$length
+	return(aList);	
+#	Col Field Type
+#	1 QNAME String
+#	2 FLAG Int
+#	3 RNAME String
+#	4 POS Int
+#	5 MAPQ Int
+#	6 CIGAR String
+#	7 RNEXT String
+#	8 PNEXT Int
+#	9 TLEN Int
+#	10 SEQ String
+#	11 QUAL String  ASCII of Phred-scaled base QUALity+33
+#these are the CIGAR string meanings	
+#M 0 alignment match (can be a sequence match or mismatch) 
+#I 1 insertion to the reference
+#D 2 deletion from the reference
+#N 3 skipped region from the reference
+#S 4 soft clipping (clipped sequences present in SEQ)
+#H 5 hard clipping (clipped sequences NOT present in SEQ)
+#P 6 padding (silent deletion from padded reference)
+#= 7 sequence match
+#X 8 sequence mismatch
+}
+
+SelectFirstReadsSam<-function(aSamFile, tolerated = 20, st="start", en="end", secondFastaFile)
+{
+	asc <- function(x) 
+	{ 
+		strtoi(charToRaw(x),16L) 
+	}
+	readQualitScore<-unlist(lapply(lapply(aSamFile$QUAL, asc), sum))
+	if(length(names(table(readQualitScore)))> 1)
+	{
+		#for latter	
+	}
+	let<-unlist(lapply(strsplit(aSamFile$CIGAR, split ="\\d+", perl = TRUE), paste, collapse = ""))
+	toKeep<-which(let == "MS" | let =="SM") #only selct for the 
+	let<-let[toKeep]
+	for ( i in 1:(length(aSamFile)-2))
+	{
+		aSamFile[[i]]<-aSamFile[[i]][toKeep]
+	}
+	tolerance = 3*tolerated
+	toTake<-c(which(aSamFile$MAPQ > tolerance))
+	if(length(toTake) == 0)
+	{
+	}
+	else
+	{	
+		let<-let[-toTake]
+		for ( i in 1:(length(aSamFile)-2))
+		{
+			aSamFile[[i]]<-aSamFile[[i]][-toTake]
+		}
+	}
+	num<-strsplit(aSamFile$CIGAR, split ="\\D+", perl = TRUE)
+	matchsize<-NULL
+	difference<-NULL
+	sel<-which(let == "MS")
+	matchsize[sel]<-as.numeric(unlist(num[sel])[ListStartPositions(num[sel])])
+	difference[sel]<-as.numeric(unlist(num[sel])[ListStartPositions(num[sel])+1])
+	sel<-which(let == "SM")
+	matchsize[sel]<-as.numeric(unlist(num[sel])[ListStartPositions(num[sel])+1])
+	difference[sel]<-as.numeric(unlist(num[sel])[ListStartPositions(num[sel])])
+	
+	TELength<-as.numeric(aSamFile$length[match(aSamFile$RNAME , aSamFile$names)])
+	location<-rep("NA", length(aSamFile[[1]]))
+	location[which(aSamFile$POS == 1)]<-st
+	location[which((aSamFile$POS +matchsize -1) == TELength )]<-en
+	toTake<-which(location =="NA")
+	if(length(toTake) == 0)
+	{
+	}
+	else
+	{	
+		let<-let[-toTake]
+		location<-location[-toTake]
+		matchsize<-matchsize[-toTake]
+		difference<-difference[-toTake]
+		for ( i in 1:(length(aSamFile)-2))
+		{
+			aSamFile[[i]]<-aSamFile[[i]][-toTake]
+		}
+	}
+	id<-paste(aSamFile$QNAME,aSamFile$RNAME ,matchsize, difference, let, location, sep =",")
+	myOut<-file(secondFastaFile, "w")
+	cat(paste(">", id, "\n", aSamFile$SEQ, sep = ""), sep = "\n", file = myOut)
+	close(myOut)
+	firstReads<-vector("list")
+	firstReads$id<-id
+	firstReads$sequence<-aSamFile$SEQ
+	return(firstReads)	
+}
+
+SelectSecondReadsSam<-function(otherSamFile,firstReads, bedFile, tolerated = 20,
+		st="start", en="end", strands=c("+", "-"), idSplit=",", pasteChar = ";")
+{
+	asc <- function(x) 
+	{ 
+		strtoi(charToRaw(x),16L) 
+	}
+	readQualitScore<-unlist(lapply(lapply(otherSamFile$QUAL, asc), sum))
+	if(length(names(table(readQualitScore)))> 1)
+	{
+		#for latter	
+	}
+	let<-unlist(lapply(strsplit(otherSamFile$CIGAR, split ="\\d+", perl = TRUE), paste, collapse = ""))
+	toKeep<-which(let == "MS" | let =="SM") #only selct for the 
+	let<-let[toKeep]
+	for ( i in 1:(length(otherSamFile)-2))
+	{
+		otherSamFile[[i]]<-otherSamFile[[i]][toKeep]
+	}
+	tolerance = 3*tolerated
+	toTake<-c(which(otherSamFile$MAPQ > tolerance))
+	if(length(toTake) == 0)
+	{
+	}
+	else
+	{	
+		let<-let[-toTake]
+		for ( i in 1:(length(otherSamFile)-2))
+		{
+			otherSamFile[[i]]<-otherSamFile[[i]][-toTake]
+		}
+	}
+	num<-strsplit(otherSamFile$CIGAR, split ="\\D+", perl = TRUE)
+	matchsize<-NULL
+	difference<-NULL
+	sel<-which(let == "MS")
+	matchsize[sel]<-as.numeric(unlist(num[sel])[ListStartPositions(num[sel])])
+	difference[sel]<-as.numeric(unlist(num[sel])[ListStartPositions(num[sel])+1])
+	sel<-which(let == "SM")
+	matchsize[sel]<-as.numeric(unlist(num[sel])[ListStartPositions(num[sel])+1])
+	difference[sel]<-as.numeric(unlist(num[sel])[ListStartPositions(num[sel])])
+	
+	tempId<-strsplit(otherSamFile$QNAME, split = idSplit)
+	tempUnlist<-unlist(tempId)
+	oldId<-vector("list", length=6)
+	for( i in 0:5)
+	{
+		oldId[[i+1]]<-tempUnlist[ListStartPositions(tempId)+i]
+	}
+	names(oldId)<-c("realId","te", "match", "diff", "oldLet", "location")
+	oldId$match<-as.numeric(oldId$match) 
+	oldId$diff<-as.numeric(oldId$diff)
+	toKeep<-which(oldId$match == difference & oldId$diff == matchsize)
+	let<-let[toKeep]
+	matchsize<-matchsize[toKeep]
+	difference<-difference[toKeep]
+	for ( i in 1:(length(otherSamFile)-2))
+	{
+		otherSamFile[[i]]<-otherSamFile[[i]][toKeep]
+	}
+	for( i in 1:6)
+	{
+		oldId[[i]]<-oldId[[i]][toKeep]
+	}
+	
+	strand<-rep(NA, length(matchsize))
+	strand[which(oldId$oldLet == let)]<-strands[2]
+	strand[which(oldId$oldLet != let)]<-strands[1]
+	
+	start<-otherSamFile$POS-1
+	end<-otherSamFile$POS+matchsize-1
+	toKeep<-paste(otherSamFile$RNAME,  start, end,strand, oldId$te, oldId$location, let, sep = pasteChar)
+	if(missing(bedFile))
+	{
+		internalVar<-new.env();
+		internalVar$toKeep<-toKeep
+		internalVar$readId<-oldId$realId
+		return(as.list(internalVar));	
+	}
+	else
+	{
+		myOutput<-file(bedFile, "w")
+		aMat<-matrix(unlist(strsplit(toKeep, split = pasteChar)), nrow = length(toKeep), byrow = TRUE)
+		chrom<-1
+		start<-2
+		end<-3
+		bedID<-paste(oldId$realId, toKeep, sep = ";")
+		cat(paste(aMat[,1],aMat[,2], aMat[,3],bedID,sep = "\t"), sep = "\n", file = myOutput)
+		close(myOutput)
+		internalVar<-new.env();
+		internalVar$toKeep<-toKeep
+		internalVar$readId<-oldId$realId
+		return(as.list(internalVar));	
+	}
+}
+
+FinalProcessingSam<-function(secondReads, sample, tsd = 20, starts = "begin", ends = "stop", 
+		splitChar = ";", lastSelection = "min" , distBetStart = tsd/2 , toPaste = ";")
+{
+	aList<-strsplit(secondReads, split = splitChar)
+	chrom<-1
+	start<-2
+	end<-3
+	firstStrand<-4
+	firstTeName<-5
+	location<-6
+	type<-7
+	bigMatrix<-matrix(unlist(aList), byrow = TRUE, nrow = length(aList))
+	aTeSet<-names(table(bigMatrix[,firstTeName]))
+	readPairs<-NULL
+	m<-1
+	GetReadStrand<-function(tm, extraInfo, pos ="+_end", neg = "-_start")
+	{
+		aStrand<-NA
+		if(length(tm) == 1)
+		{
+			if(extraInfo[tm] == pos)
+			{
+				aStrand<-"+"
+			}
+			else if(extraInfo[tm] == neg)
+			{
+				aStrand<-"-"
+			}
+			nReads<-1
+		}
+		else
+		{
+			tempTable<-table(extraInfo[tm])
+			namesT<-names(tempTable)
+			countTable<-c(tempTable, use.names=FALSE)
+			tempName<-"NA"
+			if(length(names(tempTable)) == 1)
+			{
+				tempName<-names(tempTable)
+				nReads<-countTable
+			}
+			else
+			{
+				select<-which(countTable == max(countTable, na.rm = TRUE))
+				if(length(select) == 1)
+				{
+					tempName<-names(tempTable)[select]
+					nReads<-countTable[select]
+				}
+				else#unknown
+				{
+					nReads<-sum(countTable)
+				}
+			}
+			if(tempName == pos)
+			{
+				aStrand<-"+"
+			}
+			else if(tempName == neg)
+			{
+				aStrand<-"-"
+			}
+		}
+		return(list(strand = aStrand, reads = nReads))
+	}
+	for ( i in 1:length(aTeSet))
+	{
+		print( aTeSet[i])
+		locations<-which(bigMatrix[,firstTeName] == aTeSet[i])
+		tempo<-matrix(data = bigMatrix[locations,], ncol = type)
+		matSize<-5
+		smMattrix<-matrix(data = tempo[which(tempo[,type] == "SM"),c(chrom,start,firstStrand,firstTeName,location)], 
+				ncol = matSize)
+		msMattrix<-matrix(data = tempo[which(tempo[,type] == "MS"),c(chrom,end,firstStrand,firstTeName,location)],
+				ncol = matSize)
+		aChNameSet<-names(table(tempo[,chrom]))
+		for ( j in 1:length(aChNameSet))
+		{		
+			tempSMMattrix<-matrix(data = smMattrix[which(smMattrix[,chrom] == aChNameSet[j]),], ncol = matSize)
+			tempMSMattrix<-matrix(data = msMattrix[which(msMattrix[,chrom] == aChNameSet[j]),], ncol = matSize)
+			starts<-as.numeric(tempSMMattrix[,2])
+			ends<-as.numeric(tempMSMattrix[,2])
+			extraInfoSt<-paste(tempSMMattrix[,3], tempSMMattrix[,5], sep = "_")
+			extraInfoEn<-paste(tempMSMattrix[,3], tempMSMattrix[,5], sep = "_")
+			tempstarts<-as.numeric(names(table(starts)))
+			tempends<-as.numeric(names(table(ends)))		
+			aMatrix<-matrix(data = NA, ncol = length(tempstarts), nrow = length(tempends), dimnames= list(tempends,tempstarts))
+			if( length(tempstarts) == 0 |length(tempends) ==0 )
+			{
+				next
+			}
+			for ( s in 1:ncol(aMatrix))
+			{
+				aMatrix[,s]<-tempends - tempstarts[s]
+			}
+			goodStarts<-as.numeric(rep(colnames(aMatrix), each =nrow(aMatrix))[which(aMatrix >0 & aMatrix<=tsd)])
+			goodEnds<-as.numeric(rep(rownames(aMatrix), ncol(aMatrix))[which(aMatrix >0 & aMatrix<=tsd)])
+			matchStart<-match(starts, goodStarts)
+			matchEnd<-match(ends, goodEnds)
+			if(length(goodStarts) == 0)
+			{
+				next
+			}
+			for( s in 1:length(goodStarts))
+			{
+				tms<-which(matchStart == s)
+				tme<-which(matchEnd == s)				
+				st<-GetReadStrand(tms,extraInfoSt )
+				en<-GetReadStrand(tme,extraInfoEn ,pos ="+_start", neg = "-_end")
+				if(is.na(st$strand) == TRUE)
+				{
+					aStrand<-en$strand
+				}
+				else if (is.na(en$strand) == TRUE)
+				{
+					aStrand<-st$strand
+				}
+				else{
+					if(en$strand == st$strand)
+					{
+						aStrand<-st$strand
+					}
+					else if (st$reads>en$reads )
+					{
+						aStrand<-st$strand
+					}
+					else if (st$reads<en$reads )
+					{
+						aStrand<-en$strand
+					}
+					else
+					{
+						aStrand<-NA
+					}
+				}
+				readPairs[m]<-paste(aChNameSet[j],goodStarts[s], goodEnds[s], goodEnds[s]-goodStarts[s], aStrand, aTeSet[i], 
+						sample, st$reads+en$reads, sep = toPaste)
+				m<-m+1
+			}		
 		}
 	}
 	return(readPairs)

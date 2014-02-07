@@ -10,7 +10,8 @@ seqWindow<-as.numeric(Args[[4]])
 logoFolder<-paste(directory, "/logo/", sep = "")
 analysisFolder<-paste(directory, "/analysis/", sep = "")
 inputFolder<-paste(analysisFolder, "metadata/", sep = "")
-organism<-system(paste("ls ", directory, "/reference/genome", sep = ""), intern = TRUE)[1]
+organism<-system(paste("ls ", directory, "/reference/genome", sep = ""), intern = TRUE)[[grep(
+				"fasta", system(paste("ls ", directory, "/reference/genome", sep = ""), intern = TRUE))]]
 organism<-paste(directory, "/reference/genome/", organism, sep = "")
 
 source("sourceCode/ngs_te_mapper_functions.R")
@@ -19,14 +20,16 @@ aFastaFile<-GetFasta(organism, sizeLocation = NA)
 
 allTogether<-paste(analysisFolder, "allSamples", sep = "")
 myOutput<-file(allTogether, "w")
-teInsertionData<-strsplit(system(paste("grep -v repeatedStart ", inputFolder, '* | cut -d ":" -f2 |sort ', sep = ""), 
-		intern = TRUE), split = "\t") 
+#teInsertionData<-strsplit(system(paste("grep -v repeatedStart ", inputFolder, '* | cut -d ":" -f2 |sort ', sep = ""), 
+#		intern = TRUE), split = "\t") 
+teInsertionData<-strsplit(system(paste("grep -v nReads ", inputFolder, '*.tsv | cut -d ":" -f2 |sort ', sep = ""), 
+				intern = TRUE), split = "\t") 
 teInsertionData<-matrix(data = unlist(teInsertionData), ncol = length(teInsertionData[[1]]), nrow = length(teInsertionData),
 		byrow = TRUE)
-cat(paste("chrom", "start", "end", "tsd", "strand", "teName", "strain", "nReads", "repeatedStart", 
+cat(paste("chrom", "start", "end", "tsd", "strand", "teName", "strain", "nReads", 
 				sep = "\t"), sep = "\n", file = myOutput)
 cat(paste(teInsertionData[,1],teInsertionData[,2], teInsertionData[,3], teInsertionData[,4],teInsertionData[,5], 
-			teInsertionData[,6],teInsertionData[,7],teInsertionData[,8], teInsertionData[,9], sep = "\t"), 
+			teInsertionData[,6],teInsertionData[,7],teInsertionData[,8], sep = "\t"), 
 	sep = "\n", file = myOutput)
 close(myOutput)
 

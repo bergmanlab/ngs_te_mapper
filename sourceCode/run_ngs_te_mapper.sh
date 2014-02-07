@@ -1,5 +1,4 @@
-    #!/usr/bin/bash 
-
+#!/usr/bin/bash 
 #set up base directory for project 
 projectdir="$PWD"
 projectdir=$projectdir/example
@@ -11,9 +10,9 @@ mkdir $projectdir/reference
 mkdir $projectdir/reference/te
 mkdir $projectdir/reference/genome
 mkdir $projectdir/analysis/
-mkdir $projectdir/analysis/psl_te
+mkdir $projectdir/analysis/align_te
 mkdir $projectdir/analysis/fasta_aligned_te
-mkdir $projectdir/analysis/psl_genome
+mkdir $projectdir/analysis/align_genome
 mkdir $projectdir/analysis/bed_tsd
 mkdir $projectdir/analysis/metadata
 mkdir $projectdir/analysis/r_data_files
@@ -38,11 +37,11 @@ cp example/sample1.fasta $projectdir/samples/fasta/sample1.fasta
 cp example/sample2.fasta $projectdir/samples/fasta/sample2.fasta
 
 #run ngs_te_mapper on all files ngs input directory
-for input in $projectdir/samples/fasta/*
-do 
-sample=`basename $input`
-R --no-save < sourceCode/ngs_te_mapper.R $sample $projectdir 1 20 20
-done
+#for input in $projectdir/samples/fasta/*
+#do 
+#sample=`basename $input`
+#R --no-save < sourceCode/ngs_te_mapper.R $sample $projectdir 1 20 20
+#done
 
 #run ngs_te_mapper on different files has if it was only one sample (for paired end)
 #the names of the files have to be separated by ";"
@@ -51,6 +50,3 @@ R --no-save < sourceCode/ngs_te_mapper.R "sample1.fasta;sample2.fasta" $projectd
 
 R --no-save < sourceCode/ngs_te_logo.R $projectdir 25
 
-
-
-Args<-unlist(strsplit('sample1.fasta;sample2.fasta example/ 1 20 20', split = " "))
