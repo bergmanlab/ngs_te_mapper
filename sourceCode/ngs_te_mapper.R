@@ -96,10 +96,11 @@ bedFileReads<-paste(bedFolder, sample, "reads",sep = "")
 bedFileInsertions<-paste(bedFolder, sample, "insertions.bed",sep = "")
 outputFile<-paste(outputFolder, sample, "insertions.tsv",sep = "")
 
-teFile<-system(paste("ls -rt ", directory, "/reference/te", sep = ""), intern = TRUE)[1]
+teFile<-system(paste("ls -rt ", directory, "/reference/te", sep = ""), intern = TRUE)[grep(
+				".fa", system(paste("ls -rt ", directory, "/reference/te", sep = ""), intern = TRUE))]
 teFile<-paste(directory, "/reference/te/", teFile, sep = "")
 organism<-system(paste("ls ", directory, "/reference/genome", sep = ""), intern = TRUE)[grep(
-	"fasta", system(paste("ls ", directory, "/reference/genome", sep = ""), intern = TRUE))]
+	".fa", system(paste("ls ", directory, "/reference/genome", sep = ""), intern = TRUE))]
 organism<-paste(directory, "/reference/genome/", organism, sep = "")
 
 referenceTE<-unlist(strsplit(teFile, split = "\\."))[1]
