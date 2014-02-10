@@ -38,9 +38,7 @@ cat(paste("going to analysze: ",sample, "\n", "in to: ",directory,"\nwith \n\t",
 	"proportion of missmatches: ",tolerance,"\n", "\t",
 	"maximum size of TSD: ", tsd, "\n", sep = ""))
 
-seqtekCo<-"seqtk fq2fa"
-blatCommand<-"blat "
-bwaCommand<-"bwa mem "
+bwaCommand<-("bwa mem ")
 bwaIndex<-"bwa index -p "
 
 #q(save = "no")
@@ -75,9 +73,6 @@ if(length(files) == 1)
 
 if(length(files) >1)
 {
-	
-	fastaFile<-paste(fastaFolder, "temp", RandomString(), sep = "")
-	myOutput<-file(fastaFile, "w")
 	fileName<-NULL
 	for ( i in 1:length(files))
 	{
@@ -85,17 +80,12 @@ if(length(files) >1)
 		{
 			#only the name of the file is given look for the file in the fasta folder
 			fileName[i]<-strsplit(files[i], split = "\\.")[[1]][1]
-			cat(system(paste("sed 's/ .*/_", fileName[i], "/g' ",fastaFolder, files[i],
-				sep = ""), intern = TRUE), file = myOutput, sep = "\n")
 		}
 		else
 		{
 			fileName[i]<-strsplit(basename(files[i]), split = "\\.")[[1]][1]
-			cat(system(paste("sed 's/ .*/_", fileName[i], "/g' ", files[i],	sep = ""), 
-				intern = TRUE), file = myOutput, sep = "\n")
 		}
 	}
-	close(myOutput)	
 	sample<-paste(fileName, collapse = "_")
 }
 aligned<-paste(firstAlignFolder, sample, sep= "" )
@@ -140,18 +130,71 @@ if (length(grep(paste(referenceGenome, ".bwt", sep = ""), paste(directory, "/ref
 	system(paste( bwaIndex, referenceGenome, organism  ,sep = " "))	
 }
 
+
 #start the analysis
 #align to the TE dataset
-system(paste(bwaCommand, referenceTE, " ", fastaFile, " >", aligned,".sam" ,sep = ""))
+
+if(length(files) == 1)
+{
+	system(paste(bwaCommand, referenceTE, " ", fastaFile, " >", aligned,".sam" ,sep = ""))
+	aSamFile<-GetSamFile(paste(aligned,".sam", sep = ""))
+}
+
+if(length(files) >1)
+{
+	for ( i in 1:length(files))
+	{
+		if(basename(files[i]) == files[i])
+		{
+			#only the name of the file is given look for the file in the fasta folder
+			fileName<-strsplit(files[i], split = "\\.")[[1]][1]
+			system(paste(bwaCommand, referenceTE, " ",fastaFolder, files[i]," >", firstAlignFolder , fileName, ".sam" ,sep = ""))
+		}
+		else
+		{
+			fileName<-strsplit(basename(files[i]), split = "\\.")[[1]][1]
+			system(paste(bwaCommand, referenceTE, " ", files[i]," >", firstAlignFolder , fileName,".sam" ,sep = ""))
+		}
+	}
+	i<-1
+	if(basename(files[i]) == files[i])
+	{
+		fileName<-strsplit(files[i], split = "\\.")[[1]][1]
+		aSamFile<-GetSamFile(paste(firstAlignFolder , fileName,".sam", sep = ""))	
+		aSamFile$QNAME<-paste(aSamFile$QNAME, fileName, sep = "_")
+	}
+	else
+	{
+		fileName<-strsplit(basename(files[i]), split = "\\.")[[1]][1]
+		aSamFile<-GetSamFile(paste(firstAlignFolder , fileName,".sam", sep = ""))
+		aSamFile$QNAME<-paste(aSamFile$QNAME, fileName, sep = "_")
+	}
+	for ( i in 2:length(files))
+	{
+		if(basename(files[i]) == files[i])
+		{
+			fileName<-strsplit(files[i], split = "\\.")[[1]][1]
+			tempSamFile<-GetSamFile(paste(firstAlignFolder , fileName,".sam", sep = ""))	
+			tempSamFile$QNAME<-paste(tempSamFile$QNAME, fileName, sep = "_")
+		}
+		else
+		{
+			
+			fileName<-strsplit(basename(files[i]), split = "\\.")[[1]][1]
+			tempSamFile<-GetSamFile(paste(firstAlignFolder , fileName,".sam", sep = ""))	
+			tempSamFile$QNAME<-paste(tempSamFile$QNAME, fileName, sep = "_")
+		}
+		aSamFile<-mapply(c, aSamFile, tempSamFile, SIMPLIFY=FALSE)
+	}
+	aSamFile$names<-tempSamFile$names
+	aSamFile$length<-tempSamFile$length
+}
+
+
+
 #select the reads that map uniquely to the end and start of the TE
-aSamFile<-GetSamFile(paste(aligned,".sam", sep = ""))
 selectedReads<-SelectFirstReadsSam(aSamFile, tolerated =tolerance ,secondFastaFile = secondFastaFile )
 system(paste(bwaCommand, referenceGenome, " ", secondFastaFile, " >", lastFile,".sam" ,sep = ""))
-
-#if(length(files) >1)
-#{
-#	system(paste("rm ", fastaFile))
-#}
 
 #select for the reads that are mapped to both the genome and the TE
 #allow for reads to be mapped to different sites by the number given from repeated
@@ -178,54 +221,6 @@ myOutput<-file(outputFile, "w")
 cat(paste("chrom", "start", "end", "tsd", "strand", "teName", "strain", "nReads", sep = "\t"), sep = "\n", file = myOutput)
 cat(paste(myLocations2[,1],myLocations2[,2], myLocations2[,3], myLocations2[,4],myLocations2[,5], myLocations2[,6], 
 				myLocations2[,7],myLocations2[,8], sep = "\t"), sep = "\n", file = myOutput)
-close(myOutput)
-
-cat("finished the job and found ", length(myLocations), " new insertions run: \nR --no-save < sourceCode/ngs_te_logo.R ",
-		directory, " 25\nto get the logos centred at the TSD with +/- 25 bp to both sides\n")
-
-###################
-###################
-#do it also for blat
-
-system(paste(blatCommand, teFile, " ", fastaFile, " ", aligned, ".psl", sep = ""))
-
-#select the reads that map uniquely to the end and start of the TE
-aPslFile<-GetPSL(paste(aligned, ".psl",sep = ""))
-selectedReads<-SelectFirstReads(aPslFile, tolerated =tolerance )
-
-#right the reads to a new fasta file
-RightNewFasta(selectedReads, fastaFile, paste(secondFastaFile, "_blat", sep = "") )
-system(paste(blatCommand, organism, " ", secondFastaFile,"_blat", " ", lastFile, ".psl", sep = ""))
-if(length(files) >1)
-{
-	system(paste("rm ", fastaFile))
-}
-#select for the reads that are mapped to both the genome and the TE
-#allow for reads to be mapped to different sites by the number given from repeated
-otherPslFile<-GetPSL(paste(lastFile, ".psl", sep = ""))
-secondReads<-SelectSecondReads(otherPslFile, paste(bedFileReads, "_blat", sep = ""), withRep = repeated, tolerated =tolerance )
-myLocations<-FinalProcessing(secondReads$toKeep,sample, tsd = tsd)
-
-if (length(myLocations) == 0)
-{
-	cat(paste("there were no new insertions found with the following criteria: ", "\n","\t",
-					"number of matches per read in the genome: ", repeated,"\n", "\t",
-					"proportion of missmatches: ",tolerance,"\n", "\t",
-					"maximum size of TSD: ", tsd, "\n", sep = ""))
-	q(save = "no")
-}
-myLocations2<-matrix(data = unlist(strsplit(myLocations, split = ";")), nrow= length(myLocations), byrow = TRUE)
-save(list = ls(), file =dataFile)
-
-myOutput<-file(paste(bedFileInsertions, "_blat",sep = ""), "w")
-cat(paste(myLocations2[,1],myLocations2[,2], myLocations2[,3], myLocations, sep = "\t"), sep = "\n", file = myOutput)
-close(myOutput)
-
-myOutput<-file(paste(outputFile, "_blat", sep = ""), "w")
-cat(paste("chrom", "start", "end", "tsd", "strand", "teName", "strain", "nReads", "repeatedStart",
-				sep = "\t"), sep = "\n", file = myOutput)
-cat(paste(myLocations2[,1],myLocations2[,2], myLocations2[,3], myLocations2[,4],myLocations2[,5], myLocations2[,6],
-				myLocations2[,7],myLocations2[,8], myLocations2[,9], sep = "\t"), sep = "\n", file = myOutput)
 close(myOutput)
 
 cat("finished the job and found ", length(myLocations), " new insertions run: \nR --no-save < sourceCode/ngs_te_logo.R ",

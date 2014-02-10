@@ -830,7 +830,8 @@ GetSamFile<-function(file, fieldNames=c("QNAME","FLAG",
 				"integer()","character()","integer()","integer()","character()","character()","integer()",
 				"integer()","character()", "character()", "character()") , toSep=";")
 {
-	afile<-scan(file,what=character(), sep = "\n", quote = "",comment.char="")
+	afile<-system(paste("grep -v '^.*[[:space:]]4[[:space:]]\\*[[:space:]]0' " , file,  sep = ""),intern = TRUE)
+#	afile<-scan(file,what=character(), sep = "\n", quote = "",comment.char="")
 	select<-grep("^@SQ", afile)
 	allLength<-vector("list",length(select) )
 	temp<-afile[select]
@@ -935,7 +936,6 @@ SelectFirstReadsSam<-function(aSamFile, tolerated = 20, st="start", en="end", se
 	sel<-which(let == "SM")
 	matchsize[sel]<-as.numeric(unlist(num[sel])[ListStartPositions(num[sel])+1])
 	difference[sel]<-as.numeric(unlist(num[sel])[ListStartPositions(num[sel])])
-	
 	TELength<-as.numeric(aSamFile$length[match(aSamFile$RNAME , aSamFile$names)])
 	location<-rep("NA", length(aSamFile[[1]]))
 	location[which(aSamFile$POS == 1)]<-st
