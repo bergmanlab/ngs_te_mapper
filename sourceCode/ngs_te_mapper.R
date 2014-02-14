@@ -200,9 +200,8 @@ system(paste(bwaCommand, referenceGenome, " ", secondFastaFile, " >", lastFile,"
 #select for the reads that are mapped to both the genome and the TE
 #allow for reads to be mapped to different sites by the number given from repeated
 otherSamFile<-GetSamFile(paste(lastFile, ".sam", sep = ""))
-secondReads<-SelectSecondReadsSam(otherSamFile, paste(bedFileReads, "test", sep = ""), tolerated =tolerance )
+secondReads<-SelectSecondReadsSam(otherSamFile, paste(bedFileReads, "new", sep = ""), tolerated =tolerance )
 myLocations<-FinalProcessingSam(secondReads$toKeep,sample, tsd = tsd)
-
 if (length(myLocations) == 0)
 {
 	cat(paste("there were no new insertions found with the following criteria: ", "\n","\t",
@@ -211,20 +210,45 @@ if (length(myLocations) == 0)
 			"maximum size of TSD: ", tsd, "\n", sep = ""))
 	q(save = "no")
 }
-myLocations2<-matrix(data = unlist(strsplit(myLocations, split = ";")), nrow= length(myLocations), byrow = TRUE)
-save(list = ls(), file =dataFile)
 
+#now for the old TEs
+#otherSamFile<-GetSamFile(paste(lastFile, ".sam", sep = ""))
+secondReadsOld<-SelectSecondReadsSamOld(otherSamFile,aSamFile, paste(bedFileReads, "old", sep = ""), tolerated =tolerance )
+minDist<-5*tsd
+myLocationsOld<-FinalProcessingSamOldTes(secondReadsOld$toKeep,sample, aSamFile, minDist)
+if (length(myLocationsOld) == 0)
+{
+	cat(paste("there were no old insertions found with the following criteria: ", "\n","\t",
+					"number of matches per read in the genome: ", repeated,"\n", "\t", 
+					"proportion of missmatches: ",tolerance,"\n", "\t",
+					"minimum size of TE: ", minDist, "\n", "\t",
+					"maximum size of TE: 1.5 * Te length",  "\n", sep = ""))
+	q(save = "no")
+}
+
+#######
+myLocations<-paste(myLocations, "new", sep = ";")
+myLocationsOld<-paste(myLocationsOld, "old", sep = ";")
+myLocations2<-matrix(data = c(unlist(strsplit(myLocations, split = ";")), unlist(strsplit(myLocationsOld, split = ";"))),
+		nrow= length(myLocations)+length(myLocationsOld), byrow = TRUE)
+myLocations2<-as.data.frame(myLocations2)
+myLocations2$V2<-as.numeric(as.character(myLocations2$V2))
+myLocations2$V3<-as.numeric(as.character(myLocations2$V3))
+myLocations2<-myLocations2[order(myLocations2$V1,myLocations2$V2,myLocations2$V3),]
 myOutput<-file(bedFileInsertions, "w")
-cat(paste(myLocations2[,1],myLocations2[,2], myLocations2[,3], myLocations, sep = "\t"), sep = "\n", file = myOutput)
+temp<-paste(myLocations2[,4],myLocations2[,5], myLocations2[,6],myLocations2[,7],myLocations2[,8],myLocations2[,9], sep = ";")
+cat(paste(myLocations2[,1],myLocations2[,2], myLocations2[,3], temp, sep = "\t"), sep = "\n", file = myOutput)
 close(myOutput)
 
 myOutput<-file(outputFile, "w")
-cat(paste("chrom", "start", "end", "tsd", "strand", "teName", "strain", "nReads", sep = "\t"), sep = "\n", file = myOutput)
+cat(paste("chrom", "start", "end", "tsd_length", "strand", "teName", "strain", "nReads","insertion", sep = "\t"), sep = "\n", file = myOutput)
 cat(paste(myLocations2[,1],myLocations2[,2], myLocations2[,3], myLocations2[,4],myLocations2[,5], myLocations2[,6], 
-				myLocations2[,7],myLocations2[,8], sep = "\t"), sep = "\n", file = myOutput)
+				myLocations2[,7],myLocations2[,8],myLocations2[,9], sep = "\t"), sep = "\n", file = myOutput)
 close(myOutput)
 
 cat("finished the job and found ", length(myLocations), " new insertions run: \nR --no-save < sourceCode/ngs_te_logo.R ",
 		directory, " 25\nto get the logos centred at the TSD with +/- 25 bp to both sides\n")
+cat("also found ", length(myLocationsOld), " previously known insertions\n")
 
+save(list = ls(), file =dataFile)
 q(save = "no")

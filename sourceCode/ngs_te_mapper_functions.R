@@ -29,8 +29,8 @@ GetSamFile<-function(file, fieldNames=c("QNAME","FLAG",
 	{
 		aList[[i]]<-unlistedFile[(ListStartPositions(afile) +i -1)]
 	}
-	lengths<-unlist(lapply(afile, length))-1
-	extraTags<-as.numeric(names(table(lengths)))
+	lengths<-unlist(lapply(afile, length))
+	extraTags<-aLength:max(lengths)
 	i<-1
 	tempo<-unlistedFile[(ListStartPositions(afile)+ extraTags[i] -1)]
 	tempo[which(lengths<extraTags[i])]<-"NA"
@@ -145,7 +145,7 @@ SelectFirstReadsSam<-function(aSamFile, tolerated = 20, st="start", en="end", se
 	return(firstReads)	
 }
 
-SelectSecondReadsSam<-function(otherSamFile,firstReads, bedFile, tolerated = 20,
+SelectSecondReadsSam<-function(otherSamFile, bedFile, tolerated = 20,
 		st="start", en="end", strands=c("+", "-"), idSplit=",", pasteChar = ";")
 {
 	asc <- function(x) 
@@ -210,11 +210,9 @@ SelectSecondReadsSam<-function(otherSamFile,firstReads, bedFile, tolerated = 20,
 	{
 		oldId[[i]]<-oldId[[i]][toKeep]
 	}
-	
 	strand<-rep(NA, length(matchsize))
 	strand[which(oldId$oldLet == let)]<-strands[2]
 	strand[which(oldId$oldLet != let)]<-strands[1]
-	
 	start<-otherSamFile$POS-1
 	end<-otherSamFile$POS+matchsize-1
 	toKeep<-paste(otherSamFile$RNAME,  start, end,strand, oldId$te, oldId$location, let, sep = pasteChar)
@@ -242,8 +240,90 @@ SelectSecondReadsSam<-function(otherSamFile,firstReads, bedFile, tolerated = 20,
 	}
 }
 
-FinalProcessingSam<-function(secondReads, sample, tsd = 20, starts = "begin", ends = "stop", 
-		splitChar = ";", lastSelection = "min" , distBetStart = tsd/2 , toPaste = ";")
+SelectSecondReadsSamOld<-function(otherSamFile,aSamFile, bedFile, tolerated = 20,
+		st="start", en="end", strands=c("+", "-"), idSplit=",", pasteChar = ";")
+{
+	asc <- function(x) 
+	{ 
+		strtoi(charToRaw(x),16L) 
+	}
+	readQualitScore<-unlist(lapply(lapply(otherSamFile$QUAL, asc), sum))
+	if(length(names(table(readQualitScore)))> 1)
+	{
+		#for latter	
+	}
+	let<-unlist(lapply(strsplit(otherSamFile$CIGAR, split ="\\d+", perl = TRUE), paste, collapse = ""))
+	toKeep<-which(let == "M") #only selct for the 
+	let<-let[toKeep]
+	for ( i in 1:(length(otherSamFile)-2))
+	{
+		otherSamFile[[i]]<-otherSamFile[[i]][toKeep]
+	}
+	tolerance = 3*tolerated
+	toTake<-c(which(otherSamFile$MAPQ > tolerance))
+	if(length(toTake) == 0)
+	{
+	}
+	else
+	{	
+		let<-let[-toTake]
+		for ( i in 1:(length(otherSamFile)-2))
+		{
+			otherSamFile[[i]]<-otherSamFile[[i]][-toTake]
+		}
+	}
+	matchsize<-as.numeric(unlist(strsplit(otherSamFile$CIGAR, split ="\\D+", perl = TRUE)))
+	tempId<-strsplit(otherSamFile$QNAME, split = idSplit)
+	tempUnlist<-unlist(tempId)
+	oldId<-vector("list", length=6)
+	for( i in 0:5)
+	{
+		oldId[[i+1]]<-tempUnlist[ListStartPositions(tempId)+i]
+	}
+	names(oldId)<-c("realId","te", "match", "diff", "oldLet", "location")
+	oldId$match<-as.numeric(oldId$match) 
+	oldId$diff<-as.numeric(oldId$diff)
+	aMatch<-match(oldId$realId, aSamFile$QNAME)
+	strandAgreement<-rep("NA", length(matchsize))
+	strandAgreement[which(otherSamFile$SEQ == aSamFile$SEQ[aMatch])]<-"+"
+	strandAgreement[which(otherSamFile$SEQ != aSamFile$SEQ[aMatch])]<-"-"
+	realLocation<-rep("NA", length(matchsize))
+	sel<-which(strandAgreement == "+" & oldId$oldLet =="SM" )
+	realLocation[sel]<-otherSamFile$POS[sel]+ oldId$diff[sel] 
+	sel<-which(strandAgreement == "+" & oldId$oldLet =="MS" )
+	realLocation[sel]<-otherSamFile$POS[sel]+ oldId$match[sel]
+	sel<-which(strandAgreement == "-" & oldId$oldLet =="SM" )
+	realLocation[sel]<-otherSamFile$POS[sel]+ oldId$match[sel] 
+	sel<-which(strandAgreement == "-" & oldId$oldLet =="MS" )
+	realLocation[sel]<-otherSamFile$POS[sel]+ oldId$diff[sel] 
+	realLocation[which(oldId$location == "end")]<-as.numeric(realLocation[which(oldId$location == "end")])-1
+	toKeep<-paste(otherSamFile$RNAME,  realLocation, strandAgreement, oldId$te, oldId$location, 
+			oldId$oldLet,  sep = pasteChar)
+	if(missing(bedFile))
+	{
+		internalVar<-new.env();
+		internalVar$toKeep<-toKeep
+		internalVar$readId<-oldId$realId
+		return(as.list(internalVar));	
+	}
+	else
+	{
+		myOutput<-file(bedFile, "w")
+		aMat<-matrix(unlist(strsplit(toKeep, split = pasteChar)), nrow = length(toKeep), byrow = TRUE)
+		chrom<-1
+		start<-2
+		end<-3
+		bedID<-paste(oldId$realId, toKeep, sep = ";")
+		cat(paste(aMat[,1],aMat[,2], aMat[,3],bedID,sep = "\t"), sep = "\n", file = myOutput)
+		close(myOutput)
+		internalVar<-new.env();
+		internalVar$toKeep<-toKeep
+		internalVar$readId<-oldId$realId
+		return(as.list(internalVar));	
+	}
+}
+
+FinalProcessingSam<-function(secondReads, sample, tsd = 20, splitChar = ";", toPaste = ";")
 {
 	aList<-strsplit(secondReads, split = splitChar)
 	chrom<-1
@@ -351,6 +431,199 @@ FinalProcessingSam<-function(secondReads, sample, tsd = 20, starts = "begin", en
 				tme<-which(matchEnd == s)				
 				st<-GetReadStrand(tms,extraInfoSt )
 				en<-GetReadStrand(tme,extraInfoEn ,pos ="+_start", neg = "-_end")
+				if(is.na(st$strand) == TRUE)
+				{
+					aStrand<-en$strand
+				}
+				else if (is.na(en$strand) == TRUE)
+				{
+					aStrand<-st$strand
+				}
+				else{
+					if(en$strand == st$strand)
+					{
+						aStrand<-st$strand
+					}
+					else if (st$reads>en$reads )
+					{
+						aStrand<-st$strand
+					}
+					else if (st$reads<en$reads )
+					{
+						aStrand<-en$strand
+					}
+					else
+					{
+						aStrand<-NA
+					}
+				}
+				readPairs[m]<-paste(aChNameSet[j],goodStarts[s], goodEnds[s], goodEnds[s]-goodStarts[s], aStrand, aTeSet[i], 
+						sample, st$reads+en$reads, sep = toPaste)
+				m<-m+1
+			}		
+		}
+	}
+	return(readPairs)
+}
+
+FinalProcessingSamOldTes<-function(secondReads, sample, aSamfile,minDist=100, maxDist = 1.5,splitChar = ";",toPaste = ";")
+{
+	aList<-strsplit(secondReads, split = splitChar)
+	chrom<-1
+	start<-2
+	strand<-3
+	firstTeName<-4
+	location<-5
+	type<-6
+	bigMatrix<-matrix(unlist(aList), byrow = TRUE, nrow = length(aList))
+	aTeSet<-names(table(bigMatrix[,firstTeName]))
+	readPairs<-NULL
+	m<-1
+	GetReadStrand<-function(tm, extraInfo, pos ="+_end", neg = "-_start")
+	{
+		aStrand<-NA
+		if(length(tm) == 1)
+		{
+			if(extraInfo[tm] == pos)
+			{
+				aStrand<-"+"
+			}
+			else if(extraInfo[tm] == neg)
+			{
+				aStrand<-"-"
+			}
+			nReads<-1
+		}
+		else
+		{
+			tempTable<-table(extraInfo[tm])
+			namesT<-names(tempTable)
+			countTable<-c(tempTable, use.names=FALSE)
+			tempName<-"NA"
+			if(length(names(tempTable)) == 1)
+			{
+				tempName<-names(tempTable)
+				nReads<-countTable
+			}
+			else
+			{
+				print(countTable)
+				select<-which(countTable == max(countTable, na.rm = TRUE))
+				if(length(select) == 1)
+				{
+					tempName<-names(tempTable)[select]
+					nReads<-countTable[select]
+				}
+				else#unknown
+				{
+					nReads<-sum(countTable)
+				}
+			}
+			if(tempName == pos)
+			{
+				aStrand<-"+"
+			}
+			else if(tempName == neg)
+			{
+				aStrand<-"-"
+			}
+		}
+		return(list(strand = aStrand, reads = nReads))
+	}
+	TestDistances<-function(test, against,aDist )
+	{
+		tempo<-as.numeric(names(table(test)))
+		for(s in 1:length(tempo))
+		{
+			aMatch<-which(is.na(match(test, tempo[s])) == FALSE)
+			if(length(aMatch)>1)
+			{
+				tmin<-min(abs(test[aMatch]-against[aMatch]))
+				if(tmin >= aDist)
+				{
+					tot<-which(abs(test[aMatch]-against[aMatch]) != tmin)
+					if(length(tot)>0)
+					{
+						test<-test[-aMatch[tot]]
+						against<-against[-aMatch[tot]]
+					}	
+					tempo<-as.numeric(names(table(test)))
+				}
+				else
+				{
+					while((tmin < aDist) & length(aMatch)>1)
+					{
+						aMatch<-which(is.na(match(test, tempo[s])) == FALSE)
+						tot<-which(abs(test[aMatch]-against[aMatch]) == tmin)
+						test<-test[-aMatch[tot]]
+						against<-against[-aMatch[tot]]
+						tempo<-as.numeric(names(table(test)))
+						aMatch<-which(is.na(match(test, tempo[s])) == FALSE)
+						tmin<-min(abs(test[aMatch]-against[aMatch]))
+					}
+				}
+			}					
+		}
+		return(list("test" = test, "against" = against))
+	}
+	for ( i in 1:length(aTeSet))
+	{
+		print( aTeSet[i])
+		tempMax<-maxDist*as.numeric(aSamFile$length[match(aTeSet[i], aSamFile$names)])
+		locations<-which(bigMatrix[,firstTeName] == aTeSet[i])
+		tempo<-matrix(data = bigMatrix[locations,], ncol = type)
+		matSize<-5
+		sMattrix<-matrix(data = tempo[which(tempo[,location] == "start"),c(chrom,start,strand,firstTeName,
+								type)],	ncol = matSize)
+		eMattrix<-matrix(data = tempo[which(tempo[,location] == "end"),c(chrom,start,strand,firstTeName,
+								type)],	ncol = matSize)
+		aChNameSet<-names(table(tempo[,chrom]))
+		for ( j in 1:length(aChNameSet))
+		{		
+			
+			tempSMattrix<-matrix(data = sMattrix[which(sMattrix[,chrom] == aChNameSet[j]),], ncol = matSize)
+			tempEMattrix<-matrix(data = eMattrix[which(eMattrix[,chrom] == aChNameSet[j]),], ncol = matSize)
+			starts<-as.numeric(tempSMattrix[,2])
+			ends<-as.numeric(tempEMattrix[,2])
+			extraInfoSt<-tempSMattrix[,3]
+			extraInfoEn<-tempEMattrix[,3]
+			tempstarts<-as.numeric(names(table(starts)))
+			tempends<-as.numeric(names(table(ends)))		
+			aMatrix<-matrix(data = NA, ncol = length(tempstarts), nrow = length(tempends), dimnames= list(tempends,tempstarts))
+			if( length(tempstarts) == 0 |length(tempends) ==0 )
+			{
+				next;
+			}
+			for ( s in 1:ncol(aMatrix))
+			{
+				aMatrix[,s]<-tempends - tempstarts[s]
+			}
+			goodStarts<-as.numeric(rep(colnames(aMatrix), each =nrow(aMatrix))[which(aMatrix >=minDist & aMatrix<=tempMax)])
+			goodEnds<-as.numeric(rep(rownames(aMatrix), ncol(aMatrix))[which(aMatrix >=minDist & aMatrix<=tempMax)])
+			if(length(goodStarts) == 0)
+			{
+				next;
+			}
+			if(length(goodEnds) != length(names(table(goodEnds))))
+			{
+				t<-TestDistances(goodEnds, goodStarts, minDist*8)
+				goodEnds<-t$test
+				goodStarts<-t$against
+			}
+			if(length(goodStarts) != length(names(table(goodStarts))))
+			{
+				t<-TestDistances(goodStarts,goodEnds, minDist*8)
+				goodStarts<-t$test
+				goodEnds<-t$against
+			}
+			matchStart<-match(starts, goodStarts)
+			matchEnd<-match(ends, goodEnds)
+			for( s in 1:length(goodStarts))
+			{
+				tms<-which(matchStart == s)
+				tme<-which(matchEnd == s)				
+				st<-GetReadStrand(tms,extraInfoSt,pos ="+", neg = "-" )
+				en<-GetReadStrand(tme,extraInfoEn ,pos ="+", neg = "-")
 				if(is.na(st$strand) == TRUE)
 				{
 					aStrand<-en$strand
