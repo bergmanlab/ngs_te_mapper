@@ -44,10 +44,10 @@ bwaIndex<-"bwa index -p "
 #q(save = "no")
 #get the folders right
 analysisFolder<-paste(directory, "/analysis/", sep = "")
-fastaFolder<-paste(directory, "/samples/fasta/", sep = "")		
+fastaFolder<-paste(directory, "/samples/", sep = "")		
 firstAlignFolder<-paste(analysisFolder, "align_te/", sep = "")
-secondFastaFolder<-paste(analysisFolder, "fasta_aligned_te/", sep = "")
-lastAlignFolder<-paste(analysisFolder, "align_genome/", sep = "")
+secondFastaFolder<-paste(analysisFolder, "aligned_te/", sep = "")
+lastAlignFolder<-paste(analysisFolder, "aligned_genome/", sep = "")
 dataFolder<-paste(analysisFolder, "r_data_files/", sep = "")
 bedFolder<-paste(analysisFolder, "bed_tsd/", sep = "")
 outputFolder<-paste(analysisFolder, "metadata/", sep = "")
@@ -78,7 +78,7 @@ if(length(files) >1)
 	{
 		if(basename(files[i]) == files[i])
 		{
-			#only the name of the file is given look for the file in the fasta folder
+			#only the name of the file is given look for the file in the sample folder
 			fileName[i]<-strsplit(files[i], split = "\\.")[[1]][1]
 		}
 		else

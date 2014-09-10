@@ -1,4 +1,4 @@
-# R --no-save < ngs_te_mapper.R /Users/user_name/ngs_te_mapper 25
+# R --no-save < ngs_te_logo.R /Users/user_name/ngs_te_mapper 25
 # Author: raquel
 ###############################################################################
 
@@ -22,15 +22,10 @@ allTogether<-paste(analysisFolder, "allSamples", sep = "")
 myOutput<-file(allTogether, "w")
 #teInsertionData<-strsplit(system(paste("grep -v repeatedStart ", inputFolder, '* | cut -d ":" -f2 |sort ', sep = ""), 
 #		intern = TRUE), split = "\t") 
-teInsertionData<-strsplit(system(paste("grep -v nReads ", inputFolder, '*.tsv | cut -d ":" -f2 |sort ', sep = ""), 
-				intern = TRUE), split = "\t") 
-teInsertionData<-matrix(data = unlist(teInsertionData), ncol = length(teInsertionData[[1]]), nrow = length(teInsertionData),
-		byrow = TRUE)
-cat(paste("chrom", "start", "end", "tsd", "strand", "teName", "strain", "nReads", 
-				sep = "\t"), sep = "\n", file = myOutput)
-cat(paste(teInsertionData[,1],teInsertionData[,2], teInsertionData[,3], teInsertionData[,4],teInsertionData[,5], 
-			teInsertionData[,6],teInsertionData[,7],teInsertionData[,8], sep = "\t"), 
-	sep = "\n", file = myOutput)
+teInsertionData<-strsplit(system(paste("grep -v nReads ", inputFolder, '*.tsv | cut -d ":" -f2 |sort ', sep = ""), intern = TRUE), split = "\t")
+teInsertionData<-matrix(data = unlist(teInsertionData), ncol = length(teInsertionData[[1]]), nrow = length(teInsertionData),byrow = TRUE)
+cat(paste("chrom", "start", "end", "tsd", "strand", "teName", "strain", "nReads", sep = "\t"), sep = "\n", file = myOutput)
+cat(paste(teInsertionData[,1],teInsertionData[,2], teInsertionData[,3], teInsertionData[,4],teInsertionData[,5], teInsertionData[,6],teInsertionData[,7],teInsertionData[,8], sep = "\t"), sep = "\n", file = myOutput)
 close(myOutput)
 
 aGraphName<-paste(logoFolder, "allSamples.ps", sep = "")
@@ -39,11 +34,13 @@ teNames<-names(table(teInsertionData[,6]))
 postscript(aGraphName, paper = 'a4', horizontal = TRUE);
 for ( i in 1:length(teNames))
 {
-	tempo<-which(teInsertionData[,6] == teNames[i])
-	mySequences<- GetSequences(aFastaFile, teInsertionData[tempo,1], as.numeric(teInsertionData[tempo,2]),seqWindow,
-			seqWindow, teInsertionData[tempo,5])
-	Logo(mySequences$matrix, title =paste(teNames[i], length(tempo), sep = " "), 
-			start = -seqWindow, ytitle = c("score"), xtitle = c("Position relative to insertion site"))
+    tempo<-which(teInsertionData[,6] == teNames[i])
+    if(names(table( teInsertionData[tempo,5]))[1] == "NA")
+    {
+        next;
+    }
+	mySequences<- GetSequences(aFastaFile, teInsertionData[tempo,1], as.numeric(teInsertionData[tempo,2]),seqWindow, seqWindow, teInsertionData[tempo,5])
+	Logo(mySequences$matrix, title =paste(teNames[i], length(tempo), sep = " "), start = -seqWindow, ytitle = c("score"), xtitle = c("Position relative to insertion site"))
 }
 dev.off()
 
