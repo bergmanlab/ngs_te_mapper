@@ -13,7 +13,7 @@ In addition to the TE insertion site mapping code, we provide an R script (ngs_t
 
 We note that the current version of ngs_te_mapper does not filter for the modal TSD length, and thus gives slightly different results to those reported in Linheiro and Bergman (2012). We also note that, as described in [Linheiro and Bergman (2012)](http://www.plosone.org/article/info%3Adoi%2F10.1371%2Fjournal.pone.0030008), the TSD logo method works best for TE families that generate fixed length TSDs (e.g. LTR retrotransposons and TIR transposons).
 
-To run the mapping and logo methods on an example fasta file, execute:
+To run the mapping and logo methods on an example fasta or fastq file, execute:
 	
 	bash sourceCode/run_ngs_te_mapper.sh
 	
@@ -21,5 +21,5 @@ Dependencies
 ============
 
   * [R](http://cran.r-project.org/)
-  * [blat](http://hgwdev.cse.ucsc.edu/~kent/src/blatSrc.zip) 
+  * [bwa](http://bio-bwa.sourceforge.net/)
 
