@@ -16,10 +16,37 @@ We note that the current version of ngs_te_mapper does not filter for the modal 
 To run the mapping and logo methods on an example fasta or fastq file, execute:
 	
 	bash sourceCode/run_ngs_te_mapper.sh
+
+For more details on how the main script (sourceCode/ngs_te_mapper.R) runs check the sourceCode/run_ngs_te_mapper.sh. 
+The main script takes has input:
+
+	genome fasta file (full path)
+	TE fasta file (full path)
+	fasta or fastq files of short read sequences (can either take the full path or just the file names has long has the input folder for the folders is supplied (fastaFolder)
+	output folder (the folder where all the output will be written in to)
+
+When running he main script it will look for the presence of the indexed genome and TE file in the same location has the fasta file, if not there it will create a new index in the same folder.
 	
 Dependencies
 ============
 
   * [R](http://cran.r-project.org/)
   * [bwa](http://bio-bwa.sourceforge.net/)
+
+Output files and folders
+============
+
+Inside the ouput folder there will be 7 other folders:
+
+	align_te (sam files from the alignment of the short read data to the TE file)
+	aligned_te (fasta file of the selected reads)
+	aligned_genome (sam files of the alignment of the selected reads to the genome file)
+	bed_tsd (the files for all insertions and for the reads that predicted the new and old sites)
+	metadata (the data for all insertions with the following columns - chrom;start;end;tsd_length;strand;teName;strain;nReads;insertion)
+	r_data_files (contains the R workspace file from the output of ngs_te_mapper.R)
+	logo (contains a pdf file of the logos for the different insertions)
+
+And one file created by the ngs_te_logo.R script that concatenates all the .tsv files in the metadata folder
+ 
+  
 
