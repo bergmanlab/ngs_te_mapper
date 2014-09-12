@@ -7,33 +7,69 @@
 # Author: raquel
 ###############################################################################
 
-Args <- commandArgs();
-toAddArgs<-2
+args <- commandArgs(trailingOnly = TRUE);
 print(sessionInfo())
-cat("\n")
-print(Args)
-sample<-Args[1+toAddArgs]
-directory<-Args[2+toAddArgs]
-if(length(Args) == (2+toAddArgs))
-{
-	Args[3+toAddArgs]<-1
-	Args[4+toAddArgs]<-20
-	Args[5+toAddArgs]<-20
-}
-if(length(Args) == (3+toAddArgs))
-{
-	Args[4+toAddArgs]<-20
-	Args[5+toAddArgs]<-20
-}
-if(length(Args) == (4+toAddArgs))
-{
-	Args[5+toAddArgs]<-20
-}
-repeated<-as.integer(Args[3+toAddArgs])
-tolerance<-as.integer(Args[4+toAddArgs])
-tsd<-as.integer(Args[5+toAddArgs])
 
-cat(paste("going to analysze: ",sample, "\n", "in to: ",directory,"\nwith \n\t",
+source("sourceCode/ngs_te_mapper_functions.R")
+cat("\n")
+print(args)
+
+sample<-NA
+genome<-NA
+teFile<-NA
+output<-NA
+fastaFolder<-NA
+repeated<-NA
+tolerance<-NA
+tsd<-NA
+
+for( i in 1:length(args))
+{
+	eval(parse(text=args[[i]]))
+}
+
+if (is.na(sample) == TRUE)
+{
+	print("need a sample to process ex: sample='sample1.fastq;sample2.fastq'")
+	q(save = "no")
+}
+if(is.na(genome) == TRUE)
+{
+	print("need the full path to the genome file ex: genome='~/ngs_te_mapper/reference/genome/dm3.fasta'")
+	q(save = "no")
+}
+if(is.na(teFile) == TRUE)
+{
+	print("need the full path to the TE file ex: teFile='~/ngs_te_mapper/reference/genome/dm3.fasta'")
+	q(save = "no")
+}
+if(is.na(output) == TRUE)
+{
+	print("need the full path to the output folder ex: output='~/ngs_te_mapper/analysis'")
+	q(save = "no")
+}
+if(is.na(fastaFolder) == TRUE)
+{
+	if(dirname(strsplit(sample, split = ";")[[1]][1]) == "." )
+	{
+		print("need the path to the samples since only the sample filename was supplied ex: fastaFolder='~/ngs_te_mapper/samples/'")
+		q(save = "no")	
+	}
+}
+if(is.na(repeated) == TRUE)
+{
+	repeated<-1
+}
+if(is.na(tolerance) == TRUE)
+{
+	tolerance<-20
+}
+if(is.na(tsd) == TRUE)
+{
+	tsd<-20
+}
+
+cat(paste("going to analyse: ",sample, "\n", "in to: ",output,"\nwith \n\t",
 	"number of matches per read in the genome: ",repeated,"\n", "\t", 
 	"proportion of missmatches: ",tolerance,"\n", "\t",
 	"maximum size of TSD: ", tsd, "\n", sep = ""))
@@ -41,18 +77,42 @@ cat(paste("going to analysze: ",sample, "\n", "in to: ",directory,"\nwith \n\t",
 bwaCommand<-("bwa mem ")
 bwaIndex<-"bwa index -p "
 
+#In here it will look if there is an index in the given Te and organism folders and if it does not exist it will create a new one
+referenceTE<-unlist(strsplit(teFile, split = "\\.fa"))[1]
+aList<-system(paste("ls -rt ", dirname(referenceTE), sep = ""), intern = TRUE)
+if (length(grep(paste(referenceTE, ".bwt", sep = ""), paste(dirname(referenceTE),"/", aList, sep = ""))) == 0)
+{
+	print("getting the bwa index for the TE set")
+	system(paste( bwaIndex, referenceTE, teFile, sep = " "))	
+}
+
+referenceGenome<-unlist(strsplit(genome, split = "\\.fa"))[1]
+aList<-system(paste("ls -rt ", dirname(referenceGenome), sep = ""), intern = TRUE)
+if (length(grep(paste(referenceGenome, ".bwt", sep = ""), paste(dirname(referenceGenome),"/", aList, sep = ""))) == 0 )
+{
+	print("getting the bwa index for the Genome")
+	system(paste( bwaIndex, referenceGenome, genome  ,sep = " "))	
+}
+
+
 #q(save = "no")
 #get the folders right
-analysisFolder<-paste(directory, "/analysis/", sep = "")
-fastaFolder<-paste(directory, "/samples/", sep = "")		
-firstAlignFolder<-paste(analysisFolder, "align_te/", sep = "")
-secondFastaFolder<-paste(analysisFolder, "aligned_te/", sep = "")
-lastAlignFolder<-paste(analysisFolder, "aligned_genome/", sep = "")
-dataFolder<-paste(analysisFolder, "r_data_files/", sep = "")
-bedFolder<-paste(analysisFolder, "bed_tsd/", sep = "")
-outputFolder<-paste(analysisFolder, "metadata/", sep = "")
+firstAlignFolder<-paste(output, "/align_te/", sep = "")
+secondFastaFolder<-paste(output, "/aligned_te/", sep = "")
+lastAlignFolder<-paste(output, "/aligned_genome/", sep = "")
+dataFolder<-paste(output, "/r_data_files/", sep = "")
+bedFolder<-paste(output, "/bed_tsd/", sep = "")
+outputFolder<-paste(output, "/metadata/", sep = "")
 
-source("sourceCode/ngs_te_mapper_functions.R")
+#make the folders here. if they already exist it will through an error 
+system(paste("mkdir ", output, sep = ""))
+system(paste("mkdir ", firstAlignFolder, sep = ""))
+system(paste("mkdir ", secondFastaFolder, sep = ""))
+system(paste("mkdir ",lastAlignFolder, sep = ""))
+system(paste("mkdir ",dataFolder, sep = ""))
+system(paste("mkdir ",bedFolder, sep = ""))
+system(paste("mkdir ",outputFolder, sep = ""))
+
 
 #now for the files
 files<-strsplit(sample, split =";")[[1]]
@@ -96,40 +156,6 @@ bedFileReads<-paste(bedFolder, sample, "reads",sep = "")
 bedFileInsertions<-paste(bedFolder, sample, "insertions.bed",sep = "")
 outputFile<-paste(outputFolder, sample, "insertions.tsv",sep = "")
 
-teFile<-system(paste("ls -rt ", directory, "/reference/te", sep = ""), intern = TRUE)[grep(
-				".fa", system(paste("ls -rt ", directory, "/reference/te", sep = ""), intern = TRUE))]
-teFile<-paste(directory, "/reference/te/", teFile, sep = "")
-organism<-system(paste("ls ", directory, "/reference/genome", sep = ""), intern = TRUE)[grep(
-	".fa", system(paste("ls ", directory, "/reference/genome", sep = ""), intern = TRUE))]
-organism<-paste(directory, "/reference/genome/", organism, sep = "")
-
-referenceTE<-unlist(strsplit(teFile, split = "\\."))[1]
-if( teFile != paste(referenceTE, ".fasta", sep =""))
-{
-	system(paste("mv ", teFile, " ",referenceTE, ".fasta", sep = ""))
-	teFile<-paste(referenceTE, ".fasta", sep = "")
-}
-aList<-system(paste("ls -rt ", directory, "/reference/te", sep = ""), intern = TRUE)
-if (length(grep(paste(referenceTE, ".bwt", sep = ""), paste(directory, "/reference/te/", aList, sep = ""))) == 0 | 
-		length(grep(paste(referenceTE, ".bwt", sep = ""), paste(directory, "/reference/te/", aList, sep = ""))) == 0 )
-{
-	print("getting the bwa index for the TE set")
-	system(paste( bwaIndex, referenceTE, teFile, sep = " "))	
-}
-
-referenceGenome<-unlist(strsplit(organism, split = "\\."))[1]
-if(organism!= paste(referenceGenome, ".fasta", sep =""))
-{
-	system(paste("mv ", organism, " ",referenceGenome, ".fasta", sep = ""))
-	organism<-paste(referenceGenome, ".fasta", sep = "")
-}
-aList<-system(paste("ls -rt ", directory, "/reference/genome/", sep = ""), intern = TRUE)
-if (length(grep(paste(referenceGenome, ".bwt", sep = ""), paste(directory, "/reference/genome/",aList, sep = ""))) == 0 | 
-		length(grep(paste(referenceGenome, ".bwt", sep = ""), paste(directory, "/reference/genome/",aList, sep = ""))) == 0 )
-{
-	print("getting the bwa index for the Genome")
-	system(paste( bwaIndex, referenceGenome, organism  ,sep = " "))	
-}
 
 
 #start the analysis
@@ -200,7 +226,7 @@ system(paste(bwaCommand, referenceGenome, " ", secondFastaFile, " >", lastFile,"
 #select for the reads that are mapped to both the genome and the TE
 #allow for reads to be mapped to different sites by the number given from repeated
 otherSamFile<-GetSamFile(paste(lastFile, ".sam", sep = ""))
-secondReads<-SelectSecondReadsSam(otherSamFile, paste(bedFileReads, "new", sep = ""), tolerated =tolerance )
+secondReads<-SelectSecondReadsSam(otherSamFile, paste(bedFileReads, "new.bed", sep = ""), tolerated =tolerance )
 myLocations<-FinalProcessingSam(secondReads$toKeep,sample, tsd = tsd)
 if (length(myLocations) == 0)
 {
@@ -213,7 +239,7 @@ if (length(myLocations) == 0)
 
 #now for the old TEs
 #otherSamFile<-GetSamFile(paste(lastFile, ".sam", sep = ""))
-secondReadsOld<-SelectSecondReadsSamOld(otherSamFile,aSamFile, paste(bedFileReads, "old", sep = ""), tolerated =tolerance )
+secondReadsOld<-SelectSecondReadsSamOld(otherSamFile,aSamFile, paste(bedFileReads, "old.bed", sep = ""), tolerated =tolerance )
 minDist<-5*tsd
 myLocationsOld<-FinalProcessingSamOldTes(secondReadsOld$toKeep,sample, aSamFile, minDist)
 if (length(myLocationsOld) == 0)
@@ -229,8 +255,7 @@ if (length(myLocationsOld) == 0)
 #######
 myLocations<-paste(myLocations, "new", sep = ";")
 myLocationsOld<-paste(myLocationsOld, "old", sep = ";")
-myLocations2<-matrix(data = c(unlist(strsplit(myLocations, split = ";")), unlist(strsplit(myLocationsOld, split = ";"))),
-		nrow= length(myLocations)+length(myLocationsOld), byrow = TRUE)
+myLocations2<-matrix(data = c(unlist(strsplit(myLocations, split = ";")), unlist(strsplit(myLocationsOld, split = ";"))), nrow= length(myLocations)+length(myLocationsOld), byrow = TRUE)
 myLocations2<-as.data.frame(myLocations2)
 myLocations2$V2<-as.numeric(as.character(myLocations2$V2))
 myLocations2$V3<-as.numeric(as.character(myLocations2$V3))
@@ -247,7 +272,7 @@ cat(paste(myLocations2[,1],myLocations2[,2], myLocations2[,3], myLocations2[,4],
 close(myOutput)
 
 cat("finished the job and found ", length(myLocations), " new insertions run: \nR --no-save < sourceCode/ngs_te_logo.R ",
-		directory, " 25\nto get the logos centred at the TSD with +/- 25 bp to both sides\n")
+		output, " 25\nto get the logos centred at the TSD with +/- 25 bp to both sides\n")
 cat("also found ", length(myLocationsOld), " previously known insertions\n")
 
 save(list = ls(), file =dataFile)

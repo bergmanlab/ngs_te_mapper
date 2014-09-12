@@ -1,20 +1,8 @@
 #!/usr/bin/bash 
 #set up base directory for project 
 projectdir="$PWD"
-projectdir=$projectdir/example
+projectdir=$projectdir
 #set up directories for input and output files
-mkdir $projectdir/samples
-mkdir $projectdir/reference
-mkdir $projectdir/reference/te
-mkdir $projectdir/reference/genome
-mkdir $projectdir/analysis/
-mkdir $projectdir/analysis/align_te
-mkdir $projectdir/analysis/fasta_aligned_te
-mkdir $projectdir/analysis/align_genome
-mkdir $projectdir/analysis/bed_tsd
-mkdir $projectdir/analysis/metadata
-mkdir $projectdir/analysis/r_data_files
-mkdir $projectdir/logo
 
 #fetch and install reference genome
 wget ftp://hgdownload.soe.ucsc.edu/goldenPath/dm3/bigZips/chromFa.tar.gz
@@ -24,32 +12,31 @@ cat chrYHet.fa chrM.fa chr2L.fa chrX.fa chr3L.fa chr4.fa chr2R.fa chr3R.fa chrUe
 mv dm3.fasta $projectdir/reference/genome
 rm chrYHet.fa chrM.fa chr2L.fa chrX.fa chr3L.fa chr4.fa chr2R.fa chr3R.fa chrUextra.fa chr2RHet.fa chr2LHet.fa chr3LHet.fa chr3RHet.fa chrU.fa chrXHet.fa
 
-#fetch and install reference TE set
-wget http://www.fruitfly.org/data/p_disrupt/datasets/ASHBURNER/VERSION9.4.1.zip
-unzip VERSION9.4.1.zip 
-mv VERSION9.4.1/D_mel_transposon_sequence_set.fasta.v9.4.1 $projectdir/reference/te
-rm -rf VERSION9.4.1*
+#fetch TE set
+wget https://raw.githubusercontent.com/cbergman/transposons/master/misc/D_mel_transposon_sequence_set.fa
+mv D_mel_transposon_sequence_set.fa $projectdir/reference/te
 
-#copy (test) input files into ngs input directory depending if they are either fasta or fastq
-#cp example/sample1.fasta $projectdir/samples/sample1.fasta
-#cp example/sample2.fasta $projectdir/samples/sample2.fasta
+#just until the new fastq files are not here 
+wget ftp://ftp.ddbj.nig.ac.jp/ddbj_database/dra/fastq/SRA018/SRA018188/SRX021061/SRR834530_1.fastq.bz2
+bzip2 -d SRR834530_1.fastq.bz2
+mv SRR834530_1.fastq $projectdir/example/sample1_1.fastq
 
-cp example/sample1.fastq $projectdir/samples/sample1.fastq
-cp example/sample2.fastq $projectdir/samples/sample2.fastq
+wget ftp://ftp.ddbj.nig.ac.jp/ddbj_database/dra/fastq/SRA018/SRA018188/SRX021061/SRR834530_2.fastq.bz2
+bzip2 -d SRR834530_2.fastq.bz2
+mv SRR834530_2.fastq $projectdir/example/sample1_2.fastq
 
 #run ngs_te_mapper on all files ngs input directory
 #for input in $projectdir/samples/fasta/*
 #do 
-#sample=`basename $input`
-#R --no-save < sourceCode/ngs_te_mapper.R $sample $projectdir 1 20 20
+#R --no-save < sourceCode/ngs_te_mapper.R "--args sample='$input' genome='$projectdir/reference/genome/dm3.fasta' teFile='$projectdir/reference/te/D_mel_transposon_sequence_set.fa' output='$projectdir/analysis'"
 #done
 
 #run ngs_te_mapper on different files has if it was only one sample (for paired end)
 #the names of the files have to be separated by ";"
 
-#R --no-save < sourceCode/ngs_te_mapper.R "sample1.fasta;sample2.fasta" $projectdir 1 20 20
+#R --no-save < sourceCode/ngs_te_mapper.R --args "sample1_1.fasta;sample1_2.fasta" $projectdir 1 20 20
 
-R --no-save < sourceCode/ngs_te_mapper.R "sample1.fastq;sample2.fastq" $projectdir 1 20 20
+R --no-save < sourceCode/ngs_te_mapper.R "--args sample='$projectdir/example/sample1_1.fastq;$projectdir/example/sample1_2.fastq' genome='$projectdir/dm3.fasta' teFile='$projectdir/D_mel_transposon_sequence_set.fa' repeated=1 tolerance=20 tsd=20 output='$projectdir/analysis'"
 
-R --no-save < sourceCode/ngs_te_logo.R $projectdir 25
+R --no-save < sourceCode/ngs_te_logo.R "--args genome='$projectdir/dm3.fasta' output='$projectdir/analysis/logo' inputFolder='$projectdir/analysis/metadata' outputFile='$projectdir/analysis/allSamples.bed' window=25"
 

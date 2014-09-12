@@ -240,8 +240,7 @@ SelectSecondReadsSam<-function(otherSamFile, bedFile, tolerated = 20,
 	}
 }
 
-SelectSecondReadsSamOld<-function(otherSamFile,aSamFile, bedFile, tolerated = 20,
-		st="start", en="end", strands=c("+", "-"), idSplit=",", pasteChar = ";")
+SelectSecondReadsSamOld<-function(otherSamFile,aSamFile, bedFile, tolerated = 20, st="start", en="end", strands=c("+", "-"), idSplit=",", pasteChar = ";")
 {
 	asc <- function(x) 
 	{ 
@@ -297,8 +296,7 @@ SelectSecondReadsSamOld<-function(otherSamFile,aSamFile, bedFile, tolerated = 20
 	sel<-which(strandAgreement == "-" & oldId$oldLet =="MS" )
 	realLocation[sel]<-otherSamFile$POS[sel]+ oldId$diff[sel] 
 	realLocation[which(oldId$location == "end")]<-as.numeric(realLocation[which(oldId$location == "end")])-1
-	toKeep<-paste(otherSamFile$RNAME,  realLocation, strandAgreement, oldId$te, oldId$location, 
-			oldId$oldLet,  sep = pasteChar)
+	toKeep<-paste(otherSamFile$RNAME,  realLocation, strandAgreement, oldId$te, oldId$location, oldId$oldLet,  sep = pasteChar)
 	if(missing(bedFile))
 	{
 		internalVar<-new.env();
@@ -311,10 +309,18 @@ SelectSecondReadsSamOld<-function(otherSamFile,aSamFile, bedFile, tolerated = 20
 		myOutput<-file(bedFile, "w")
 		aMat<-matrix(unlist(strsplit(toKeep, split = pasteChar)), nrow = length(toKeep), byrow = TRUE)
 		chrom<-1
-		start<-2
-		end<-3
+		start<-as.numeric(aMat[,2])
+		end<-as.numeric(aMat[,2])
+		sel<-which(strandAgreement == "+" & oldId$oldLet =="SM" )
+		end[sel]<-as.numeric(aMat[,2])[sel]+ oldId$diff[sel] +1
+		sel<-which(strandAgreement == "+" & oldId$oldLet =="MS" )
+		start[sel]<-as.numeric(aMat[,2])[sel]- oldId$diff[sel] 
+		sel<-which(strandAgreement == "-" & oldId$oldLet =="SM" )
+		start[sel]<-as.numeric(aMat[,2])[sel]- oldId$diff[sel] 
+		sel<-which(strandAgreement == "-" & oldId$oldLet =="MS" )
+		end[sel]<-as.numeric(aMat[,2])[sel]+ oldId$diff[sel]
 		bedID<-paste(oldId$realId, toKeep, sep = ";")
-		cat(paste(aMat[,1],aMat[,2], aMat[,3],bedID,sep = "\t"), sep = "\n", file = myOutput)
+		cat(paste(aMat[,1],start,end, bedID,sep = "\t"), sep = "\n", file = myOutput)
 		close(myOutput)
 		internalVar<-new.env();
 		internalVar$toKeep<-toKeep
@@ -573,14 +579,11 @@ FinalProcessingSamOldTes<-function(secondReads, sample, aSamfile,minDist=100, ma
 		locations<-which(bigMatrix[,firstTeName] == aTeSet[i])
 		tempo<-matrix(data = bigMatrix[locations,], ncol = type)
 		matSize<-5
-		sMattrix<-matrix(data = tempo[which(tempo[,location] == "start"),c(chrom,start,strand,firstTeName,
-								type)],	ncol = matSize)
-		eMattrix<-matrix(data = tempo[which(tempo[,location] == "end"),c(chrom,start,strand,firstTeName,
-								type)],	ncol = matSize)
+		sMattrix<-matrix(data = tempo[which(tempo[,location] == "start"),c(chrom,start,strand,firstTeName,type)],	ncol = matSize)
+		eMattrix<-matrix(data = tempo[which(tempo[,location] == "end"),c(chrom,start,strand,firstTeName,type)],	ncol = matSize)
 		aChNameSet<-names(table(tempo[,chrom]))
 		for ( j in 1:length(aChNameSet))
 		{		
-			
 			tempSMattrix<-matrix(data = sMattrix[which(sMattrix[,chrom] == aChNameSet[j]),], ncol = matSize)
 			tempEMattrix<-matrix(data = eMattrix[which(eMattrix[,chrom] == aChNameSet[j]),], ncol = matSize)
 			starts<-as.numeric(tempSMattrix[,2])

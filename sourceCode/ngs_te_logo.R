@@ -2,36 +2,67 @@
 # Author: raquel
 ###############################################################################
 
-Args <- commandArgs();
-print(Args)
-directory<-Args[[3]]
-seqWindow<-as.numeric(Args[[4]])
 
-logoFolder<-paste(directory, "/logo/", sep = "")
-analysisFolder<-paste(directory, "/analysis/", sep = "")
-inputFolder<-paste(analysisFolder, "metadata/", sep = "")
-organism<-system(paste("ls ", directory, "/reference/genome", sep = ""), intern = TRUE)[[grep(
-				"fasta", system(paste("ls ", directory, "/reference/genome", sep = ""), intern = TRUE))]]
-organism<-paste(directory, "/reference/genome/", organism, sep = "")
+
+args <- commandArgs(trailingOnly = TRUE);
+args <- commandArgs(trailingOnly = TRUE);
+print(sessionInfo())
 
 source("sourceCode/ngs_te_mapper_functions.R")
+cat("\n")
+print(args)
 
-aFastaFile<-GetFasta(organism, sizeLocation = NA)		
+genome<-NA
+output<-NA
+outputFile<-NA
+inputFolder<-NA
+window<-NA
+for( i in 1:length(args))
+{
+	eval(parse(text=args[[i]]))
+}
 
-allTogether<-paste(analysisFolder, "allSamples", sep = "")
-myOutput<-file(allTogether, "w")
-#teInsertionData<-strsplit(system(paste("grep -v repeatedStart ", inputFolder, '* | cut -d ":" -f2 |sort ', sep = ""), 
-#		intern = TRUE), split = "\t") 
-teInsertionData<-strsplit(system(paste("grep -v nReads ", inputFolder, '*.tsv | cut -d ":" -f2 |sort ', sep = ""), intern = TRUE), split = "\t")
+if(is.na(genome) == TRUE)
+{
+	print("need the full path to the genome file ex: genome='~/ngs_te_mapper/reference/genome/dm3.fasta'")
+	q(save = "no")
+}
+if(is.na(output) == TRUE)
+{
+	print("need the full path to the output folder ex: output='~/ngs_te_mapper/analysis/logo'")
+	q(save = "no")
+}
+if(is.na(inputFolder) == TRUE)
+{
+	print("need the path to input folder that contains the results from the analysis from ngs_te_mapper.R ex: inputFolder='$projectdir/analysis/metadata'")
+	q(save = "no")	
+}
+if(is.na(outputFile) == TRUE)
+{	
+	print("need the full path to the output file that will have all the samples together ex: output='~/analysis/allSamples'")
+	q(save = "no")
+}
+if(is.na(window) == TRUE)
+{
+	window<-25
+}
+source("sourceCode/ngs_te_mapper_functions.R")
+aFastaFile<-GetFasta(genome, sizeLocation = NA)		
+myOutput<-file(outputFile, "w")
+
+teInsertionData<-strsplit(system(paste("grep -v nReads ", inputFolder, '/*.tsv | cut -d ":" -f2 |sort ', sep = ""), intern = TRUE), split = "\t")
 teInsertionData<-matrix(data = unlist(teInsertionData), ncol = length(teInsertionData[[1]]), nrow = length(teInsertionData),byrow = TRUE)
 cat(paste("chrom", "start", "end", "tsd", "strand", "teName", "strain", "nReads", sep = "\t"), sep = "\n", file = myOutput)
+teInsertionData<-teInsertionData[order(teInsertionData[,1],teInsertionData[,2], teInsertionData[,3]),]
 cat(paste(teInsertionData[,1],teInsertionData[,2], teInsertionData[,3], teInsertionData[,4],teInsertionData[,5], teInsertionData[,6],teInsertionData[,7],teInsertionData[,8], sep = "\t"), sep = "\n", file = myOutput)
 close(myOutput)
 
-aGraphName<-paste(logoFolder, "allSamples.ps", sep = "")
+#if it exists it will just through an error
+system(paste("mkdir ", output, sep = ""))
+aGraphName<-paste(output, "/allSamples.pdf", sep = "")
 
 teNames<-names(table(teInsertionData[,6]))
-postscript(aGraphName, paper = 'a4', horizontal = TRUE);
+pdf(aGraphName, height=8.3,  width= 11.7);
 for ( i in 1:length(teNames))
 {
     tempo<-which(teInsertionData[,6] == teNames[i])
@@ -39,8 +70,8 @@ for ( i in 1:length(teNames))
     {
         next;
     }
-	mySequences<- GetSequences(aFastaFile, teInsertionData[tempo,1], as.numeric(teInsertionData[tempo,2]),seqWindow, seqWindow, teInsertionData[tempo,5])
-	Logo(mySequences$matrix, title =paste(teNames[i], length(tempo), sep = " "), start = -seqWindow, ytitle = c("score"), xtitle = c("Position relative to insertion site"))
+	mySequences<- GetSequences(aFastaFile, teInsertionData[tempo,1], as.numeric(teInsertionData[tempo,2]),window, window, teInsertionData[tempo,5])
+	Logo(mySequences$matrix, title =paste(teNames[i], length(tempo), sep = " "), start = -window, ytitle = c("score"), xtitle = c("Position relative to insertion site"))
 }
 dev.off()
 
