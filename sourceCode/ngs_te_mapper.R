@@ -108,10 +108,10 @@ outputFolder<-paste(output, "/metadata/", sep = "")
 system(paste("mkdir ", output, sep = ""))
 system(paste("mkdir ", firstAlignFolder, sep = ""))
 system(paste("mkdir ", secondFastaFolder, sep = ""))
-system(paste("mkdir ",lastAlignFolder, sep = ""))
-system(paste("mkdir ",dataFolder, sep = ""))
-system(paste("mkdir ",bedFolder, sep = ""))
-system(paste("mkdir ",outputFolder, sep = ""))
+system(paste("mkdir ", lastAlignFolder, sep = ""))
+system(paste("mkdir ", dataFolder, sep = ""))
+system(paste("mkdir ", bedFolder, sep = ""))
+system(paste("mkdir ", outputFolder, sep = ""))
 
 
 #now for the files
