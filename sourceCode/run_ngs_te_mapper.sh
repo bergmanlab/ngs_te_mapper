@@ -9,12 +9,11 @@ wget ftp://hgdownload.soe.ucsc.edu/goldenPath/dm3/bigZips/chromFa.tar.gz
 tar -zxvf chromFa.tar.gz
 rm chromFa.tar.gz
 cat chrYHet.fa chrM.fa chr2L.fa chrX.fa chr3L.fa chr4.fa chr2R.fa chr3R.fa chrUextra.fa chr2RHet.fa chr2LHet.fa chr3LHet.fa chr3RHet.fa chrU.fa chrXHet.fa > dm3.fasta
-mv dm3.fasta $projectdir/reference/genome
+
 rm chrYHet.fa chrM.fa chr2L.fa chrX.fa chr3L.fa chr4.fa chr2R.fa chr3R.fa chrUextra.fa chr2RHet.fa chr2LHet.fa chr3LHet.fa chr3RHet.fa chrU.fa chrXHet.fa
 
 # fetch D. melanogaster TE set
 wget https://raw.githubusercontent.com/cbergman/transposons/master/misc/D_mel_transposon_sequence_set.fa
-mv D_mel_transposon_sequence_set.fa $projectdir/reference/te
 
 # fetch D. melanogaster WGS reads
 wget ftp.sra.ebi.ac.uk/vol1/fastq/SRR834/SRR834530/SRR834530_1.fastq.gz
