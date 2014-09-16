@@ -12,6 +12,11 @@ print(sessionInfo())
 
 source("sourceCode/ngs_te_mapper_functions.R")
 cat("\n")
+if (length(args) ==0 )
+{
+	print(paste("need to have arguments passed in ex:", "\n", "--args sample='sample1.fastq;sample2.fastq' genome='~/ngs_te_mapper/reference/genome/dm3.fasta' teFile='~/ngs_te_mapper/reference/genome/dm3.fasta' output='~/ngs_te_mapper/analysis' ", sep = ""))
+	q(save = "no")
+}
 print(args)
 
 sample<-NA
