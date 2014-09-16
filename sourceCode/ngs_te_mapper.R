@@ -14,7 +14,7 @@ source("sourceCode/ngs_te_mapper_functions.R")
 cat("\n")
 if (length(args) ==0 )
 {
-	print(paste("need to have arguments passed in ex:", "\n", "--args sample='sample1.fastq;sample2.fastq' genome='~/ngs_te_mapper/reference/genome/dm3.fasta' teFile='~/ngs_te_mapper/reference/genome/dm3.fasta' output='~/ngs_te_mapper/analysis' ", sep = ""))
+	print(paste("need to have arguments passed in ex:", "\n", "sourceCode/ngs_te_mapper.R sample='sample1.fastq;sample2.fastq' genome='~/ngs_te_mapper/reference/genome/dm3.fasta' teFile='~/ngs_te_mapper/reference/genome/dm3.fasta' output='~/ngs_te_mapper/analysis' ", sep = ""))
 	q(save = "no")
 }
 print(args)
@@ -30,7 +30,9 @@ tsd<-NA
 
 for( i in 1:length(args))
 {
-	eval(parse(text=args[[i]]))
+	test<-strsplit(args[[i]], split = "=")
+	assign(test[[1]][1], test[[1]][2], envir=.GlobalEnv);
+#	eval(parse(text=args[[i]]))
 }
 
 if (is.na(sample) == TRUE)
@@ -61,19 +63,30 @@ if(is.na(fastaFolder) == TRUE)
 		q(save = "no")	
 	}
 }
+if(is.na(repeated) == FALSE)
+{
+	repeated<-as.numeric(repeated)
+}
 if(is.na(repeated) == TRUE)
 {
 	repeated<-1
+}
+if(is.na(tolerance) == FALSE)
+{
+	tolerance<-as.numeric(tolerance)
 }
 if(is.na(tolerance) == TRUE)
 {
 	tolerance<-20
 }
+if(is.na(tsd) == FALSE)
+{
+	tsd<-as.numeric(tsd)
+}
 if(is.na(tsd) == TRUE)
 {
 	tsd<-20
 }
-
 cat(paste("going to analyse: ",sample, "\n", "in to: ",output,"\nwith \n\t",
 	"number of matches per read in the genome: ",repeated,"\n", "\t", 
 	"proportion of missmatches: ",tolerance,"\n", "\t",

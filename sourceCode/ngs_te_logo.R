@@ -1,10 +1,9 @@
+#!/usr/bin/Rscript --vanilla 
 # R --no-save < ngs_te_logo.R /Users/user_name/ngs_te_mapper 25
 # Author: raquel
 ###############################################################################
 
 
-
-args <- commandArgs(trailingOnly = TRUE);
 args <- commandArgs(trailingOnly = TRUE);
 print(sessionInfo())
 
@@ -19,9 +18,11 @@ inputFolder<-NA
 window<-NA
 for( i in 1:length(args))
 {
-	eval(parse(text=args[[i]]))
+	test<-strsplit(args[[i]], split = "=")
+	assign(test[[1]][1], test[[1]][2], envir=.GlobalEnv);
+#	eval(parse(text=args[[i]]))
 }
-
+rm(test)
 if(is.na(genome) == TRUE)
 {
 	print("need the full path to the genome file ex: genome='~/ngs_te_mapper/reference/genome/dm3.fasta'")
@@ -42,10 +43,15 @@ if(is.na(outputFile) == TRUE)
 	print("need the full path to the output file that will have all the samples together ex: output='~/analysis/allSamples'")
 	q(save = "no")
 }
+if(is.na(window) == FALSE)
+{
+	window<-as.numeric(window)
+}
 if(is.na(window) == TRUE)
 {
 	window<-25
 }
+
 source("sourceCode/ngs_te_mapper_functions.R")
 aFastaFile<-GetFasta(genome, sizeLocation = NA)		
 myOutput<-file(outputFile, "w")
