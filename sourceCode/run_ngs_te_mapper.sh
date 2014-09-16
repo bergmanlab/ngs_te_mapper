@@ -3,7 +3,7 @@
 # set up base directory for project 
 projectdir="$PWD"
 projectdir=$projectdir
-
+mkdir $projectdir/example
 # fetch D. melanogaster reference genome
 wget ftp://hgdownload.soe.ucsc.edu/goldenPath/dm3/bigZips/chromFa.tar.gz
 tar -zxvf chromFa.tar.gz
@@ -29,7 +29,7 @@ mv SRR834530_2.fastq $projectdir/example/sample1_2.fastq
 # with junction reads being pooled before TSD and logo identification
 
 chmod u+x sourceCode/ngs_te_mapper.R 
-sourceCode/ngs_te_mapper.R sample=$projectdir/example/sample1_1.fastq;$projectdir/example/sample1_2.fastq genome=$projectdir/dm3.fasta teFile=$projectdir/D_mel_transposon_sequence_set.fa repeated=1 tolerance=20 tsd=20 output=$projectdir/analysis
+sourceCode/ngs_te_mapper.R sample='$projectdir/example/sample1_1.fastq;$projectdir/example/sample1_2.fastq' genome=$projectdir/dm3.fasta teFile=$projectdir/D_mel_transposon_sequence_set.fa repeated=1 tolerance=20 tsd=20 output=$projectdir/analysis
 
 chmod u+x sourceCode/ngs_te_logo.R 
 sourceCode/ngs_te_logo.R  genome=$projectdir/dm3.fasta output=$projectdir/analysis/logo inputFolder=$projectdir/analysis/metadata outputFile=$projectdir/analysis/allSamples.bed window=25
