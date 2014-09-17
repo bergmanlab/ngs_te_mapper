@@ -13,7 +13,7 @@ cat("\n")
 
 if (length(args) ==0 )
 {
-	print(paste("need to have arguments passed in ex:", "\n", "sourceCode/ngs_te_mapper.R sample=~/ngs_te_mapper/example/sample1.fastq\\;~/ngs_te_mapper/example/sample2.fastq genome=~/ngs_te_mapper/reference/genome/dm3.fasta teFile=~/ngs_te_mapper/reference/genome/dm3.fasta output= ~/ngs_te_mapper/analysis sourceCodeFolder=~/ngs_te_mapper/sourceCode", sep = ""))
+	cat(paste("need to have arguments passed in ex:", "\n", "sourceCode/ngs_te_mapper.R sample=~/ngs_te_mapper/example/sample1.fastq\\;~/ngs_te_mapper/example/sample2.fastq genome=~/ngs_te_mapper/reference/genome/dm3.fasta teFile=~/ngs_te_mapper/reference/genome/dm3.fasta output= ~/ngs_te_mapper/analysis sourceCodeFolder=~/ngs_te_mapper/sourceCode", sep = ""))
 	q(save = "no")
 }
 
