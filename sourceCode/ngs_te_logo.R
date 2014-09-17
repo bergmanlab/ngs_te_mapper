@@ -11,7 +11,7 @@ source("sourceCode/ngs_te_mapper_functions.R")
 cat("\n")
 if (length(args) ==0 )
 {
-	print(paste("need to have arguments passed in ex:", "\n", "sourceCode/ngs_te_logo.R genome=~/ngs_te_mapper/reference/genome/dm3.fasta output=~/ngs_te_mapper/analysis/logo inputFolder=~/analysis/metadata outputFile=~/analysis/allSamples.bed window=25 sourceCodeFolder=~/ngs_te_mapper/sourceCode", sep = ""))
+	cat(paste("need to have arguments passed in ex:", "\n", "sourceCode/ngs_te_logo.R genome=~/ngs_te_mapper/reference/genome/dm3.fasta output=~/ngs_te_mapper/analysis/logo inputFolder=~/analysis/metadata outputFile=~/analysis/allSamples.bed window=25 sourceCodeFolder=~/ngs_te_mapper/sourceCode", sep = ""))
 	q(save = "no")
 }
 print(args)
