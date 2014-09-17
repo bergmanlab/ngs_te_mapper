@@ -717,8 +717,7 @@ GetFasta<-function(file, aNameLocation = 1, charSplit = " ", sizeLocation = 7, s
 	}	
 }
 
-GetSequences<-function (fastaFile, chrom, start,winLeft, winRigth, strand,  complement = 1, 
-		posPairs  = c("A","C","G","T"), negPairs = c("T","G", "C", "A"))
+GetSequences<-function (fastaFile, chrom, start,winLeft, winRigth, strand,  complement = 1, posPairs  = c("A","C","G","T"), negPairs = c("T","G", "C", "A"))
 {
 	start<-as.vector(start[which (strand != "NA")])
 	chrom<-as.vector(chrom[which(strand != "NA")])

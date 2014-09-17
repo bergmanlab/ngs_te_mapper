@@ -9,6 +9,11 @@ print(sessionInfo())
 
 source("sourceCode/ngs_te_mapper_functions.R")
 cat("\n")
+if (length(args) ==0 )
+{
+	print(paste("need to have arguments passed in ex:", "\n", "sourceCode/ngs_te_logo.R genome=~/ngs_te_mapper/reference/genome/dm3.fasta output=~/ngs_te_mapper/analysis/logo inputFolder=~/analysis/metadata outputFile=~/analysis/allSamples.bed window=25 sourceCodeFolder=~/ngs_te_mapper/sourceCode", sep = ""))
+	q(save = "no")
+}
 print(args)
 
 genome<-NA
@@ -43,6 +48,11 @@ if(is.na(outputFile) == TRUE)
 	print("need the full path to the output file that will have all the samples together ex: output='~/analysis/allSamples'")
 	q(save = "no")
 }
+if(is.na(sourceCodeFolder) == TRUE)
+{
+	print("need the full path to the sourceCodeFolder folder ex: output='~/ngs_te_mapper/sourceCode'")
+	q(save = "no")
+}
 if(is.na(window) == FALSE)
 {
 	window<-as.numeric(window)
@@ -52,7 +62,7 @@ if(is.na(window) == TRUE)
 	window<-25
 }
 
-source("sourceCode/ngs_te_mapper_functions.R")
+source(paste(sourceCodeFolder, "/ngs_te_mapper_functions.R", sep = ""))
 aFastaFile<-GetFasta(genome, sizeLocation = NA)		
 myOutput<-file(outputFile, "w")
 
