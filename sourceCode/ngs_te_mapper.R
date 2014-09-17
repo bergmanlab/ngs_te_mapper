@@ -293,7 +293,7 @@ cat(paste(myLocations2[,1],myLocations2[,2], myLocations2[,3], myLocations2[,4],
 				myLocations2[,7],myLocations2[,8],myLocations2[,9], sep = "\t"), sep = "\n", file = myOutput)
 close(myOutput)
 
-cat(paste("finished the job and found ", length(myLocations), " new insertions run: \n\n chmod u+x sourceCode/ngs_te_logo.R \n sourceCode/ngs_te_logo.R  genome=",genome, " output=",output, "/logo inputFolder=", output, "/metadata outputFile=", output, "/allSamples.bed window=25", "\nto get the logos centred at the TSD with +/- 25 bp to both sides\n\n", sep = ""))
+cat(paste("finished the job and found ", length(myLocations), " new insertions run: \n\nsourceCode/ngs_te_logo.R  genome=",genome, " output=",output, "/logo inputFolder=", output, "/metadata outputFile=", output, "/allSamples.bed window=25", "\nto get the logos centred at the TSD with +/- 25 bp to both sides\n\n", sep = ""))
 cat("also found ", length(myLocationsOld), " previously known insertions\n")
 
 save(list = ls(), file =dataFile)
