@@ -38,7 +38,7 @@ When running the main script it will look for the presence of the indexed genome
 Output files and folders
 ============
 
-Inside the output folder there will be 7 other folders:
+ngs_te_mapper creates a main output directory called 'analysis'. Inside this directory there will be 7 other directory:
 - align_te (sam files from the alignment of the short read data to the TE file)
 - aligned_te (fasta file of the selected reads)
 - aligned_genome (sam files of the alignment of the selected reads to the genome file)
