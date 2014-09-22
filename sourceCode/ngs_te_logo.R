@@ -66,7 +66,7 @@ source(paste(sourceCodeFolder, "/ngs_te_mapper_functions.R", sep = ""))
 aFastaFile<-GetFasta(genome, sizeLocation = NA)		
 myOutput<-file(outputFile, "w")
 
-teInsertionData<-strsplit(system(paste("grep -v nReads ", inputFolder, '/*.tsv | cut -d ":" -f2 |sort ', sep = ""), intern = TRUE), split = "\t")
+teInsertionData<-strsplit(system(paste("grep . ", inputFolder, '/*insertions.bed | cut -d ":" -f2 | sort | sed "s/;/\t/g"', sep = ""), intern = TRUE), split = "\t")
 teInsertionData<-matrix(data = unlist(teInsertionData), ncol = length(teInsertionData[[1]]), nrow = length(teInsertionData),byrow = TRUE)
 cat(paste("chrom", "start", "end", "tsd", "strand", "teName", "strain", "nReads", sep = "\t"), sep = "\n", file = myOutput)
 teInsertionData<-teInsertionData[order(teInsertionData[,1],teInsertionData[,2], teInsertionData[,3]),]
@@ -77,17 +77,17 @@ close(myOutput)
 system(paste("mkdir ", output, sep = ""))
 aGraphName<-paste(output, "/allSamples.pdf", sep = "")
 
-teNames<-names(table(teInsertionData[,6]))
+teNames<-names(table(teInsertionData[which(teInsertionData[,9] == "new"),6]))
 pdf(aGraphName, height=8.3,  width= 11.7);
 for ( i in 1:length(teNames))
 {
-    tempo<-which(teInsertionData[,6] == teNames[i])
+    tempo<-which(teInsertionData[,6] == teNames[i] & teInsertionData[,9] == "new")
     if(names(table( teInsertionData[tempo,5]))[1] == "NA")
     {
         next;
     }
 	mySequences<- GetSequences(aFastaFile, teInsertionData[tempo,1], as.numeric(teInsertionData[tempo,2]),window, window, teInsertionData[tempo,5])
-	Logo(mySequences$matrix, title =paste(teNames[i], length(tempo), sep = " "), start = -window, ytitle = c("score"), xtitle = c("Position relative to insertion site"))
+	Logo(mySequences$matrix, title =paste(teNames[i], length(mySequences$id), sep = " "), start = -window, ytitle = c("score"), xtitle = c("Position relative to insertion site"))
 }
 dev.off()
 

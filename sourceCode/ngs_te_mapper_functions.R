@@ -94,19 +94,19 @@ SelectFirstReadsSam<-function(aSamFile, tolerated = 20, st="start", en="end", se
 	{
 		aSamFile[[i]]<-aSamFile[[i]][toKeep]
 	}
-	tolerance = 3*tolerated
-	toTake<-c(which(aSamFile$MAPQ > tolerance))
-	if(length(toTake) == 0)
-	{
-	}
-	else
-	{	
-		let<-let[-toTake]
-		for ( i in 1:(length(aSamFile)-2))
-		{
-			aSamFile[[i]]<-aSamFile[[i]][-toTake]
-		}
-	}
+#	tolerance = 3*tolerated
+#	toTake<-c(which(aSamFile$MAPQ > tolerance))
+#	if(length(toTake) == 0)
+#	{
+#	}
+#	else
+#	{	
+#		let<-let[-toTake]
+#		for ( i in 1:(length(aSamFile)-2))
+#		{
+#			aSamFile[[i]]<-aSamFile[[i]][-toTake]
+#		}
+#	}
 	num<-strsplit(aSamFile$CIGAR, split ="\\D+", perl = TRUE)
 	matchsize<-NULL
 	difference<-NULL
@@ -145,8 +145,7 @@ SelectFirstReadsSam<-function(aSamFile, tolerated = 20, st="start", en="end", se
 	return(firstReads)	
 }
 
-SelectSecondReadsSam<-function(otherSamFile, bedFile, tolerated = 20,
-		st="start", en="end", strands=c("+", "-"), idSplit=",", pasteChar = ";")
+SelectSecondReadsSam<-function(otherSamFile, bedFile, tolerated = 20, st="start", en="end", strands=c("+", "-"), idSplit=",", pasteChar = ";")
 {
 	asc <- function(x) 
 	{ 
@@ -165,19 +164,19 @@ SelectSecondReadsSam<-function(otherSamFile, bedFile, tolerated = 20,
 	{
 		otherSamFile[[i]]<-otherSamFile[[i]][toKeep]
 	}
-	tolerance = 3*tolerated
-	toTake<-c(which(otherSamFile$MAPQ > tolerance))
-	if(length(toTake) == 0)
-	{
-	}
-	else
-	{	
-		let<-let[-toTake]
-		for ( i in 1:(length(otherSamFile)-2))
-		{
-			otherSamFile[[i]]<-otherSamFile[[i]][-toTake]
-		}
-	}
+#	tolerance = 3*tolerated
+#	toTake<-c(which(otherSamFile$MAPQ > tolerance))
+#	if(length(toTake) == 0)
+#	{
+#	}
+#	else
+#	{	
+#		let<-let[-toTake]
+#		for ( i in 1:(length(otherSamFile)-2))
+#		{
+#			otherSamFile[[i]]<-otherSamFile[[i]][-toTake]
+#		}
+#	}
 	num<-strsplit(otherSamFile$CIGAR, split ="\\D+", perl = TRUE)
 	matchsize<-NULL
 	difference<-NULL
@@ -258,19 +257,19 @@ SelectSecondReadsSamOld<-function(otherSamFile,aSamFile, bedFile, tolerated = 20
 	{
 		otherSamFile[[i]]<-otherSamFile[[i]][toKeep]
 	}
-	tolerance = 3*tolerated
-	toTake<-c(which(otherSamFile$MAPQ > tolerance))
-	if(length(toTake) == 0)
-	{
-	}
-	else
-	{	
-		let<-let[-toTake]
-		for ( i in 1:(length(otherSamFile)-2))
-		{
-			otherSamFile[[i]]<-otherSamFile[[i]][-toTake]
-		}
-	}
+#	tolerance = 3*tolerated
+#	toTake<-c(which(otherSamFile$MAPQ > tolerance))
+#	if(length(toTake) == 0)
+#	{
+#	}
+#	else
+#	{	
+#		let<-let[-toTake]
+#		for ( i in 1:(length(otherSamFile)-2))
+#		{
+#			otherSamFile[[i]]<-otherSamFile[[i]][-toTake]
+#		}
+#	}
 	matchsize<-as.numeric(unlist(strsplit(otherSamFile$CIGAR, split ="\\D+", perl = TRUE)))
 	tempId<-strsplit(otherSamFile$QNAME, split = idSplit)
 	tempUnlist<-unlist(tempId)
