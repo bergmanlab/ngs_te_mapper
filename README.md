@@ -22,7 +22,7 @@ Example
 To run the mapping and logo methods on an test dataset, clone this repository and execute the test script as follows:
 
 ```
-git clone git@github.com:bergmanlab/ngs_te_mapper.git
+git clone https://github.com/bergmanlab/ngs_te_mapper.git
 cd ngs_te_mapper
 bash sourceCode/run_ngs_te_mapper.sh
 ```
