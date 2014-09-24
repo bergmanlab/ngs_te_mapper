@@ -34,8 +34,7 @@ genome=$projectdir/dm3.fasta \
 teFile=$projectdir/D_mel_transposon_sequence_set.fa \
 tsd=20 \
 output=$projectdir/analysis \
-sourceCodeFolder=$projectdir/sourceCode \
-
+sourceCodeFolder=$projectdir/sourceCode 
 
 $projectdir/sourceCode/ngs_te_logo.R \
 genome=$projectdir/dm3.fasta \
@@ -43,5 +42,27 @@ output=$projectdir/analysis/logo \
 inputFolder=$projectdir/analysis/bed_tsd \
 outputFile=$projectdir/analysis/allSamples.bed \
 window=25 \
-sourceCodeFolder=$projectdir/sourceCode \
+sourceCodeFolder=$projectdir/sourceCode 
+
+nDiffentLines="`diff -y --suppress-common-lines $projectdir/expectedBedFile.bed $projectdir/analysis/bed_tsd/sample1_1_sample1_2insertions.bed | grep -c '[[:space:]]|[[:space:]]'`"
+nNotPresentInNewFile="`diff -y --suppress-common-lines $projectdir/expectedBedFile.bed $projectdir/analysis/bed_tsd/sample1_1_sample1_2insertions.bed | grep -c '[[:space:]]>[[:space:]]'`"
+nPresentOnlyNewFile="`diff -y --suppress-common-lines $projectdir/expectedBedFile.bed $projectdir/analysis/bed_tsd/sample1_1_sample1_2insertions.bed | grep -c '[[:space:]]<'`"
+
+if [ $nDiffentLines -eq 0 ]; then
+	echo "There was no insertion sites that were different between the test .bed file and the new .bed file from ~analysis/bed_tsd "
+else 
+	echo "There was $nDiffentLines insertion site/s that was/were different between the test .bed file and the new .bed file from ~analysis/bed_tsd "
+fi
+
+if [ $nNotPresentInNewFile -eq 0 ]; then
+	echo "All insertion sites in the test .bed file were also present in the new .bed file from ~analysis/bed_tsd"
+else
+	echo "There was $nNotPresentInNewFile insertion site/s that was/were present in the test .bed file and not in the new .bed file from ~analysis/bed_tsd "
+fi
+
+if [ $nPresentOnlyNewFile -eq 0 ]; then
+	echo "All insertion sites in the new .bed file from ~analysis/bed_tsd were also present in the test .bed"
+else
+	echo "There was $nPresentOnlyNewFile insertion site/s that was/were present in the new .bed file from ~analysis/bed_tsd and not in the test .bed file"
+fi
 
