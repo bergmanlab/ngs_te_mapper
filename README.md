@@ -15,7 +15,6 @@ In addition to the TE insertion site mapping code, we provide an R script (ngs_t
 
 We note that the current version of ngs_te_logo.R does not currently filter for the modal TSD length, and thus gives slightly different results to those reported in Linheiro and Bergman (2012). Additionally, the current implementation uses [BWA](http://bio-bwa.sourceforge.net/) as a short read mapping engine instead of BLAT, as was used originally in Linheiro and Bergman (2012). 
 
-
 Example
 =======
 
@@ -27,29 +26,32 @@ cd ngs_te_mapper
 bash sourceCode/run_ngs_te_mapper.sh
 ```
 
-This test script runs the main script `ngs_te_mapper.R` which takes five required arguments as input:
-- sourceCodeFolder (full path to location of `ngs_te_mapper.R` script)
-- genome (full path to reference genome fasta file)
-- teFile (full path TE fasta file )
+This test script runs the main script `ngs_te_mapper.R` which takes six required arguments as input:
 - sample (full path to fasta or fastq files of short read sequences; alternatively list of file names if the input folder option is specified, see below)
-- output (full path to output folder )
+- genome (full path to reference genome fasta file)
+- teFile (full path TE fasta file)
+- tsd (maximum size of potential target site duplication, default=20)
+- output (full path to output folder)
+- sourceCodeFolder (full path to location of `ngs_te_mapper.R` script)
 
-`ngs_te_mapper.R` takes two additional options arguments as input:
-- mapq (filter , default=60)
-- tsd ( , default=20)
+This test script then runs the logo script `ngs_te_logo.R` which takes six required arguments as input:
+- genome (full path to reference genome fasta file)
+- output (directory to output pdf file)
+- inputFolder (location of .bed files from ngs_te_mapper.R)
+- outputFile (.bed file with concatenated results from .bed files of individual samples in inputFolder)
+- window (number of nucleotides analyzed upstream and downstream of TSD, default=25)
+- sourceCodeFolder (full path to location of `ngs_te_mapper.R` script)
 
-
-When running the main script it will look for the presence of the indexed genome and TE file in the same location as the genome fasta file, if not there it will create a new genome index in the same folder.
-	
 Output files and folders
 ============
 
-ngs_te_mapper creates a main output directory called 'analysis'. Inside this directory there will be 7 other directories:
+ngs_te_mapper creates a main output directory called 'analysis'. Inside this directory there will be five other directories:
 - aligned_te (.sam files of short reads aligned to the TE file, one per input sample)
 - selected_reads (.fasta file of the selected reads, one file containing selected reads from all samples)
 - aligned_genome (.sam file of selected reads aligned to reference genome, one file containing selected reads from all samples)
 - bed_tsd (.bed file, one file containing predicted reference and non-reference TE insertions)
 - logo (.pdf file, one file with one per logo per family derived from non-reference insertions)
+
 
 Dependencies
 ============
