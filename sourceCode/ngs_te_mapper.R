@@ -153,12 +153,9 @@ if(length(files) >1)
 aligned<-paste(firstAlignFolder, sample, sep= "" )
 secondFastaFile<-paste(secondFastaFolder,sample,".fasta", sep= "" )
 lastFile<-paste(lastAlignFolder,sample, sep= "" )
-#dataFile<-paste(dataFolder,sample, ".Rdata", sep= "" )
 bedFileReads<-paste(bedFolder, sample, "reads",sep = "")
 bedFileInsertions<-paste(bedFolder, sample, "insertions.bed",sep = "")
 #outputFile<-paste(outputFolder, sample, "insertions.tsv",sep = "")
-
-
 
 #start the analysis
 #align to the TE dataset
@@ -250,9 +247,6 @@ if (length(myLocationsOld) == 0)
 }
 
 #######
-myLocations<-paste(myLocations, "new", sep = ";")
-myLocationsOld<-paste(myLocationsOld, "old", sep = ";")
-
 if(length(myLocations) == 0)
 {
 	if(length(myLocationsOld) == 0)
@@ -261,6 +255,7 @@ if(length(myLocations) == 0)
 	}
 	else
 	{
+		myLocationsOld<-paste(myLocationsOld, "old", sep = ";")
 		myLocations2<-matrix(data = unlist(strsplit(myLocationsOld, split = ";")), nrow= length(myLocationsOld), byrow = TRUE)
 		myLocations2<-as.data.frame(myLocations2)
 		myLocations2$V2<-as.numeric(as.character(myLocations2$V2))
@@ -277,6 +272,7 @@ if(length(myLocations) > 0)
 {
 	if(length(myLocationsOld) == 0)
 	{
+		myLocations<-paste(myLocations, "new", sep = ";")
 		myLocations2<-matrix(data = unlist(strsplit(myLocations, split = ";")), nrow= length(myLocations), byrow = TRUE)
 		myLocations2<-as.data.frame(myLocations2)
 		myLocations2$V2<-as.numeric(as.character(myLocations2$V2))
@@ -289,6 +285,8 @@ if(length(myLocations) > 0)
 	}
 	else
 	{
+		myLocationsOld<-paste(myLocationsOld, "old", sep = ";")
+		myLocations<-paste(myLocations, "new", sep = ";")
 		myLocations2<-matrix(data = c(unlist(strsplit(myLocations, split = ";")), unlist(strsplit(myLocationsOld, split = ";"))), nrow= length(myLocations)+length(myLocationsOld), byrow = TRUE)
 		myLocations2<-as.data.frame(myLocations2)
 		myLocations2$V2<-as.numeric(as.character(myLocations2$V2))
@@ -299,7 +297,6 @@ if(length(myLocations) > 0)
 		cat(paste(myLocations2[,1],myLocations2[,2], myLocations2[,3], temp, sep = "\t"), sep = "\n", file = myOutput)
 		close(myOutput)
 	}
-	
 }
 
 #myOutput<-file(outputFile, "w")
@@ -310,5 +307,6 @@ if(length(myLocations) > 0)
 cat(paste("finished the job and found ", length(myLocations), " new insertions run: \n\nsourceCode/ngs_te_logo.R  genome=",genome, " output=",output, "/logo inputFolder=", output, "/metadata outputFile=", output, "/allSamples.bed window=25", "\nto get the logos centred at the TSD with +/- 25 bp to both sides\n\n", sep = ""))
 cat("also found ", length(myLocationsOld), " previously known insertions\n")
 
+#dataFile<-paste(dataFolder,sample, ".Rdata", sep= "" )
 #save(list = ls(), file =dataFile)
 q(save = "no")
