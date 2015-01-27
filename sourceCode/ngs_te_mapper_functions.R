@@ -159,10 +159,17 @@ SelectSecondReadsSam<-function(otherSamFile, bedFile, tolerated = 20, st="start"
 	let<-unlist(lapply(strsplit(otherSamFile$CIGAR, split ="\\d+", perl = TRUE), paste, collapse = ""))
 	let<-gsub("H", "S",let )#it does not matter now the reads are there 
 	toKeep<-which(let == "MS" | let =="SM") #only selct for the 
-	let<-let[toKeep]
-	for ( i in 1:(length(otherSamFile)-2))
+	if(length(toKeep) >=1)
 	{
-		otherSamFile[[i]]<-otherSamFile[[i]][toKeep]
+		let<-let[toKeep]
+		for ( i in 1:(length(otherSamFile)-2))
+		{
+			otherSamFile[[i]]<-otherSamFile[[i]][toKeep]
+		}
+	}
+	else
+	{
+		return(list(toKeep = NULL,readId=NULL ))
 	}
 #	tolerance = 3*tolerated
 #	toTake<-c(which(otherSamFile$MAPQ > tolerance))
@@ -186,7 +193,6 @@ SelectSecondReadsSam<-function(otherSamFile, bedFile, tolerated = 20, st="start"
 	sel<-which(let == "SM")
 	matchsize[sel]<-as.numeric(unlist(num[sel])[ListStartPositions(num[sel])+1])
 	difference[sel]<-as.numeric(unlist(num[sel])[ListStartPositions(num[sel])])
-	
 	tempId<-strsplit(otherSamFile$QNAME, split = idSplit)
 	tempUnlist<-unlist(tempId)
 	oldId<-vector("list", length=6)
@@ -198,16 +204,23 @@ SelectSecondReadsSam<-function(otherSamFile, bedFile, tolerated = 20, st="start"
 	oldId$match<-as.numeric(oldId$match) 
 	oldId$diff<-as.numeric(oldId$diff)
 	toKeep<-which(oldId$match == difference & oldId$diff == matchsize)
-	let<-let[toKeep]
-	matchsize<-matchsize[toKeep]
-	difference<-difference[toKeep]
-	for ( i in 1:(length(otherSamFile)-2))
+	if(length(toKeep) >=1)
 	{
-		otherSamFile[[i]]<-otherSamFile[[i]][toKeep]
+		let<-let[toKeep]
+		matchsize<-matchsize[toKeep]
+		difference<-difference[toKeep]
+		for ( i in 1:(length(otherSamFile)-2))
+		{
+			otherSamFile[[i]]<-otherSamFile[[i]][toKeep]
+		}
+		for( i in 1:6)
+		{
+			oldId[[i]]<-oldId[[i]][toKeep]
+		}
 	}
-	for( i in 1:6)
+	else
 	{
-		oldId[[i]]<-oldId[[i]][toKeep]
+		return(list(toKeep = NULL,readId=NULL ))
 	}
 	strand<-rep(NA, length(matchsize))
 	strand[which(oldId$oldLet == let)]<-strands[2]
@@ -215,27 +228,34 @@ SelectSecondReadsSam<-function(otherSamFile, bedFile, tolerated = 20, st="start"
 	start<-otherSamFile$POS-1
 	end<-otherSamFile$POS+matchsize-1
 	toKeep<-paste(otherSamFile$RNAME,  start, end,strand, oldId$te, oldId$location, let, sep = pasteChar)
-	if(missing(bedFile))
+	if(length(toKeep) >=1)
 	{
-		internalVar<-new.env();
-		internalVar$toKeep<-toKeep
-		internalVar$readId<-oldId$realId
-		return(as.list(internalVar));	
+		if(missing(bedFile))
+		{
+			internalVar<-new.env();
+			internalVar$toKeep<-toKeep
+			internalVar$readId<-oldId$realId
+			return(as.list(internalVar));	
+		}
+		else
+		{
+			myOutput<-file(bedFile, "w")
+			aMat<-matrix(unlist(strsplit(toKeep, split = pasteChar)), nrow = length(toKeep), byrow = TRUE)
+			chrom<-1
+			start<-2
+			end<-3
+			bedID<-paste(oldId$realId, toKeep, sep = ";")
+			cat(paste(aMat[,1],aMat[,2], aMat[,3],bedID,sep = "\t"), sep = "\n", file = myOutput)
+			close(myOutput)
+			internalVar<-new.env();
+			internalVar$toKeep<-toKeep
+			internalVar$readId<-oldId$realId
+			return(as.list(internalVar));	
+		}
 	}
 	else
 	{
-		myOutput<-file(bedFile, "w")
-		aMat<-matrix(unlist(strsplit(toKeep, split = pasteChar)), nrow = length(toKeep), byrow = TRUE)
-		chrom<-1
-		start<-2
-		end<-3
-		bedID<-paste(oldId$realId, toKeep, sep = ";")
-		cat(paste(aMat[,1],aMat[,2], aMat[,3],bedID,sep = "\t"), sep = "\n", file = myOutput)
-		close(myOutput)
-		internalVar<-new.env();
-		internalVar$toKeep<-toKeep
-		internalVar$readId<-oldId$realId
-		return(as.list(internalVar));	
+		return(list(toKeep = NULL,readId=NULL ))
 	}
 }
 
@@ -252,10 +272,17 @@ SelectSecondReadsSamOld<-function(otherSamFile,aSamFile, bedFile, tolerated = 20
 	}
 	let<-unlist(lapply(strsplit(otherSamFile$CIGAR, split ="\\d+", perl = TRUE), paste, collapse = ""))
 	toKeep<-which(let == "M") #only selct for the 
-	let<-let[toKeep]
-	for ( i in 1:(length(otherSamFile)-2))
+	if(length(toKeep) >=1)
 	{
-		otherSamFile[[i]]<-otherSamFile[[i]][toKeep]
+		let<-let[toKeep]
+		for ( i in 1:(length(otherSamFile)-2))
+		{
+			otherSamFile[[i]]<-otherSamFile[[i]][toKeep]
+		}	
+	}
+	else
+	{
+		return(list(toKeep = NULL,readId=NULL ))
 	}
 #	tolerance = 3*tolerated
 #	toTake<-c(which(otherSamFile$MAPQ > tolerance))
@@ -296,40 +323,51 @@ SelectSecondReadsSamOld<-function(otherSamFile,aSamFile, bedFile, tolerated = 20
 	realLocation[sel]<-otherSamFile$POS[sel]+ oldId$diff[sel] 
 	realLocation[which(oldId$location == "end")]<-as.numeric(realLocation[which(oldId$location == "end")])-1
 	toKeep<-paste(otherSamFile$RNAME,  realLocation, strandAgreement, oldId$te, oldId$location, oldId$oldLet,  sep = pasteChar)
-	if(missing(bedFile))
+	if(length(toKeep) >=1)
 	{
-		internalVar<-new.env();
-		internalVar$toKeep<-toKeep
-		internalVar$readId<-oldId$realId
-		return(as.list(internalVar));	
+		if(missing(bedFile))
+		{
+			internalVar<-new.env();
+			internalVar$toKeep<-toKeep
+			internalVar$readId<-oldId$realId
+			return(as.list(internalVar));	
+		}
+		else
+		{
+			myOutput<-file(bedFile, "w")
+			aMat<-matrix(unlist(strsplit(toKeep, split = pasteChar)), nrow = length(toKeep), byrow = TRUE)
+			chrom<-1
+			start<-as.numeric(aMat[,2])
+			end<-as.numeric(aMat[,2])
+			sel<-which(strandAgreement == "+" & oldId$oldLet =="SM" )
+			end[sel]<-as.numeric(aMat[,2])[sel]+ oldId$diff[sel] +1
+			sel<-which(strandAgreement == "+" & oldId$oldLet =="MS" )
+			start[sel]<-as.numeric(aMat[,2])[sel]- oldId$diff[sel] 
+			sel<-which(strandAgreement == "-" & oldId$oldLet =="SM" )
+			start[sel]<-as.numeric(aMat[,2])[sel]- oldId$diff[sel] 
+			sel<-which(strandAgreement == "-" & oldId$oldLet =="MS" )
+			end[sel]<-as.numeric(aMat[,2])[sel]+ oldId$diff[sel]
+			bedID<-paste(oldId$realId, toKeep, sep = ";")
+			cat(paste(aMat[,1],start,end, bedID,sep = "\t"), sep = "\n", file = myOutput)
+			close(myOutput)
+			internalVar<-new.env();
+			internalVar$toKeep<-toKeep
+			internalVar$readId<-oldId$realId
+			return(as.list(internalVar));	
+		}
 	}
 	else
 	{
-		myOutput<-file(bedFile, "w")
-		aMat<-matrix(unlist(strsplit(toKeep, split = pasteChar)), nrow = length(toKeep), byrow = TRUE)
-		chrom<-1
-		start<-as.numeric(aMat[,2])
-		end<-as.numeric(aMat[,2])
-		sel<-which(strandAgreement == "+" & oldId$oldLet =="SM" )
-		end[sel]<-as.numeric(aMat[,2])[sel]+ oldId$diff[sel] +1
-		sel<-which(strandAgreement == "+" & oldId$oldLet =="MS" )
-		start[sel]<-as.numeric(aMat[,2])[sel]- oldId$diff[sel] 
-		sel<-which(strandAgreement == "-" & oldId$oldLet =="SM" )
-		start[sel]<-as.numeric(aMat[,2])[sel]- oldId$diff[sel] 
-		sel<-which(strandAgreement == "-" & oldId$oldLet =="MS" )
-		end[sel]<-as.numeric(aMat[,2])[sel]+ oldId$diff[sel]
-		bedID<-paste(oldId$realId, toKeep, sep = ";")
-		cat(paste(aMat[,1],start,end, bedID,sep = "\t"), sep = "\n", file = myOutput)
-		close(myOutput)
-		internalVar<-new.env();
-		internalVar$toKeep<-toKeep
-		internalVar$readId<-oldId$realId
-		return(as.list(internalVar));	
+		return(list(toKeep = NULL,readId=NULL ))
 	}
 }
 
 FinalProcessingSam<-function(secondReads, sample, tsd = 20, splitChar = ";", toPaste = ";")
 {
+	if(length(secondReads) == 0)
+	{
+		return(x=NULL)
+	}
 	aList<-strsplit(secondReads, split = splitChar)
 	chrom<-1
 	start<-2
@@ -473,6 +511,10 @@ FinalProcessingSam<-function(secondReads, sample, tsd = 20, splitChar = ";", toP
 
 FinalProcessingSamOldTes<-function(secondReads, sample, aSamfile,minDist=100, maxDist = 1.5,splitChar = ";",toPaste = ";")
 {
+	if(length(secondReads) == 0)
+	{
+		return(x=NULL)
+	}
 	aList<-strsplit(secondReads, split = splitChar)
 	chrom<-1
 	start<-2
