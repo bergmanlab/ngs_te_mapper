@@ -255,7 +255,7 @@ if(length(myLocations) == 0)
 	}
 	else
 	{
-		myLocationsOld<-paste(myLocationsOld, "old", sep = ";")
+		myLocationsOld<-paste(myLocationsOld, "reference", sep = ";")
 		myLocations2<-matrix(data = unlist(strsplit(myLocationsOld, split = ";")), nrow= length(myLocationsOld), byrow = TRUE)
 		myLocations2<-as.data.frame(myLocations2)
 		myLocations2$V2<-as.numeric(as.character(myLocations2$V2))
@@ -272,7 +272,7 @@ if(length(myLocations) > 0)
 {
 	if(length(myLocationsOld) == 0)
 	{
-		myLocations<-paste(myLocations, "new", sep = ";")
+		myLocations<-paste(myLocations, "non-reference", sep = ";")
 		myLocations2<-matrix(data = unlist(strsplit(myLocations, split = ";")), nrow= length(myLocations), byrow = TRUE)
 		myLocations2<-as.data.frame(myLocations2)
 		myLocations2$V2<-as.numeric(as.character(myLocations2$V2))
@@ -285,8 +285,8 @@ if(length(myLocations) > 0)
 	}
 	else
 	{
-		myLocationsOld<-paste(myLocationsOld, "old", sep = ";")
-		myLocations<-paste(myLocations, "new", sep = ";")
+		myLocationsOld<-paste(myLocationsOld, "reference", sep = ";")
+		myLocations<-paste(myLocations, "non-reference", sep = ";")
 		myLocations2<-matrix(data = c(unlist(strsplit(myLocations, split = ";")), unlist(strsplit(myLocationsOld, split = ";"))), nrow= length(myLocations)+length(myLocationsOld), byrow = TRUE)
 		myLocations2<-as.data.frame(myLocations2)
 		myLocations2$V2<-as.numeric(as.character(myLocations2$V2))

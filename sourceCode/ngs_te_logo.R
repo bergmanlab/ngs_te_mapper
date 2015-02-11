@@ -66,7 +66,7 @@ source(paste(sourceCodeFolder, "/ngs_te_mapper_functions.R", sep = ""))
 aFastaFile<-GetFasta(genome, sizeLocation = NA)		
 myOutput<-file(outputFile, "w")
 
-teInsertionData<-strsplit(system(paste("grep . ", inputFolder, '/*insertions.bed | cut -d ":" -f2 | sort | sed "s/;/\t/g"', sep = ""), intern = TRUE), split = "\t")
+teInsertionData<-strsplit(system(paste("grep --color=never . ", inputFolder, '/*insertions.bed | cut -d ":" -f2 | sort | sed "s/;/\t/g"', sep = ""), intern = TRUE), split = "\t")
 teInsertionData<-matrix(data = unlist(teInsertionData), ncol = length(teInsertionData[[1]]), nrow = length(teInsertionData),byrow = TRUE)
 cat(paste("chrom", "start", "end", "tsd", "strand", "teName", "strain", "nReads", sep = "\t"), sep = "\n", file = myOutput)
 teInsertionData<-teInsertionData[order(teInsertionData[,1],teInsertionData[,2], teInsertionData[,3]),]
