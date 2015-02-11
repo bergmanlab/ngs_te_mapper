@@ -5,7 +5,7 @@ ngs_te_mapper is an R implementation of the method for detecting transposable el
 
 Non-reference TE insertions are detected using a two-stage process that relies on the presence of target site duplications (TSDs) in the region flanking the TE insertion. An overview of the two-stage mapping procedure is shown below, and is taken from [Figure 1](http://www.plosone.org/article/fetchObject.action?uri=info:doi/10.1371/journal.pone.0030008.g001&representation=PNG_M) of Linheiro and Bergman (2012). 
 <p align="center">
-![without](img/journal.pone.0030008.g001.jpg?raw=true)
+![without](https://raw.githubusercontent.com/bergmanlab/ngs_te_mapper/master/img/journal.pone.0030008.g001.jpg?raw=true)
 </p>
 
 In the first stage, raw reads from a whole genome shotgun sequence are used to query against a library of reference TE sequences. 'Junction reads' that span the start/end of TE and genomic flanking sequences are retained. Such reads are often referred as 'split-reads', although in reality these reads are not split in the resequenced genome. 
