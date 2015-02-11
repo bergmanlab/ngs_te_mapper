@@ -4,8 +4,9 @@ ngs_te_mapper
 ngs_te_mapper is an R implementation of the method for detecting transposable element (TE) insertions from next-generation sequencing (NGS) data published in [Linheiro and Bergman (2012) PLoS ONE 7(2): e30008](http://www.plosone.org/article/info%3Adoi%2F10.1371%2Fjournal.pone.0030008). The original method only detected non-reference (aka _de novo_) TE insertions, however it has been extended to identify TE insertions also found in the reference genome. Additionally, the current implementation uses [BWA](http://bio-bwa.sourceforge.net/) as a short read mapping engine instead of BLAT, as was used originally in Linheiro and Bergman (2012). 
 
 Non-reference TE insertions are detected using a two-stage process that relies on the presence of target site duplications (TSDs) in the region flanking the TE insertion. An overview of the two-stage mapping procedure is shown below, and is taken from [Figure 1](http://www.plosone.org/article/fetchObject.action?uri=info:doi/10.1371/journal.pone.0030008.g001&representation=PNG_M) of Linheiro and Bergman (2012). 
-
+<p align="center">
 ![without](img/journal.pone.0030008.g001.jpg?raw=true)
+</p>
 
 In the first stage, raw reads from a whole genome shotgun sequence are used to query against a library of reference TE sequences. 'Junction reads' that span the start/end of TE and genomic flanking sequences are retained. Such reads are often referred as 'split-reads', although in reality these reads are not split in the resequenced genome. 
 
