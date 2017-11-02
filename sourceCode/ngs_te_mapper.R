@@ -1,4 +1,4 @@
-#!/usr/bin/Rscript --vanilla 
+#!/usr/bin/env Rscript
 #chmod u+x ngs_te_mapper.R
 #./ngs_te_mapper.R sample.fasta /Users/user_name/ngs_te_mapper 1 20
 #align to the TEs first

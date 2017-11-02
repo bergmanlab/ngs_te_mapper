@@ -1,4 +1,4 @@
-#!/usr/bin/Rscript --vanilla 
+#!/usr/bin/env Rscript
 # R --no-save < ngs_te_logo.R /Users/user_name/ngs_te_mapper 25
 # Author: raquel
 ###############################################################################

@@ -28,7 +28,7 @@ mv SRR834530_2.fastq $projectdir/example/sample1_2.fastq
 # in this case, both files from a paired end run are being mapped independently, 
 # with junction reads being pooled before TSD and logo identification
 
-$projectdir/sourceCode/ngs_te_mapper.R \
+Rscript --vanilla $projectdir/sourceCode/ngs_te_mapper.R \
 sample=$projectdir/example/sample1_1.fastq\;$projectdir/example/sample1_2.fastq \
 genome=$projectdir/dm3.fasta \
 teFile=$projectdir/D_mel_transposon_sequence_set.fa \
@@ -36,7 +36,7 @@ tsd=20 \
 output=$projectdir/analysis \
 sourceCodeFolder=$projectdir/sourceCode 
 
-$projectdir/sourceCode/ngs_te_logo.R \
+Rscript --vanilla $projectdir/sourceCode/ngs_te_logo.R \
 genome=$projectdir/dm3.fasta \
 output=$projectdir/analysis/logo \
 inputFolder=$projectdir/analysis/bed_tsd \

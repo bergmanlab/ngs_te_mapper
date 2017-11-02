@@ -1,4 +1,4 @@
-#!/usr/bin/Rscript --vanilla 
+#!/usr/bin/env Rscript
 # chmod u+x functions.R
 # 1:00:56 PM
 # TODO: Add comment 
