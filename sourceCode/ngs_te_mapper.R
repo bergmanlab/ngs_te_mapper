@@ -22,6 +22,7 @@ sample<-NA
 genome<-NA
 teFile<-NA
 output<-NA
+thread<-NA
 fastaFolder<-NA
 tsd<-NA
 sourceCodeFolder<-NA
@@ -73,10 +74,20 @@ if(is.na(tsd) == TRUE)
 {
 	tsd<-20
 }
+if(is.na(thread) == FALSE)
+{
+	thread<-as.numeric(thread)
+}
+if(is.na(thread) == TRUE)
+{
+	thread<-1
+}
 cat(paste("going to analyse: ",sample, "\n", "in to: ",output,"\nwith \n\t",
 	"maximum size of TSD: ", tsd, "\n", sep = ""))
 
-bwaCommand<-("bwa mem ")
+cat(paste("number of thread used: ", thread, "\n", sep = ""))
+
+bwaCommand<-paste("bwa mem -t ", thread, " ", sep = "")
 bwaIndex<-"bwa index -p "
 source(paste(sourceCodeFolder, "/ngs_te_mapper_functions.R", sep = ""))
 #In here it will look if there is an index in the given Te and organism folders and if it does not exist it will create a new one
