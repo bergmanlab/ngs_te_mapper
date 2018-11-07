@@ -36,6 +36,7 @@ This test script runs the main script `ngs_te_mapper.R` which takes six required
 - genome (full path to reference genome fasta file)
 - teFile (full path TE fasta file)
 - tsd (maximum size of potential target site duplication, default=20)
+- thread (number of thread used for bwa, default=1)
 - output (full path to output folder)
 - sourceCodeFolder (full path to location of `ngs_te_mapper.R` script)
 
