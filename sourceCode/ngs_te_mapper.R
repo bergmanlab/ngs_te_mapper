@@ -258,6 +258,7 @@ if (length(myLocationsOld) == 0)
 }
 
 #######
+myOutput<-file(bedFileInsertions, "w")
 if(length(myLocations) == 0)
 {
 	if(length(myLocationsOld) == 0)
@@ -272,11 +273,8 @@ if(length(myLocations) == 0)
 		myLocations2$V2<-as.numeric(as.character(myLocations2$V2))
 		myLocations2$V3<-as.numeric(as.character(myLocations2$V3))
 		myLocations2<-myLocations2[order(myLocations2$V1,myLocations2$V2,myLocations2$V3),]
-		myOutput<-file(bedFileInsertions, "w")
 		temp<-paste(myLocations2[,4],myLocations2[,5], myLocations2[,6],myLocations2[,7],myLocations2[,8],myLocations2[,9], sep = ";")
 		cat(paste(myLocations2[,1],myLocations2[,2], myLocations2[,3], temp, sep = "\t"), sep = "\n", file = myOutput)
-		close(myOutput)
-		
 	}
 }
 if(length(myLocations) > 0)
@@ -289,10 +287,8 @@ if(length(myLocations) > 0)
 		myLocations2$V2<-as.numeric(as.character(myLocations2$V2))
 		myLocations2$V3<-as.numeric(as.character(myLocations2$V3))
 		myLocations2<-myLocations2[order(myLocations2$V1,myLocations2$V2,myLocations2$V3),]
-		myOutput<-file(bedFileInsertions, "w")
 		temp<-paste(myLocations2[,4],myLocations2[,5], myLocations2[,6],myLocations2[,7],myLocations2[,8],myLocations2[,9], sep = ";")
 		cat(paste(myLocations2[,1],myLocations2[,2], myLocations2[,3], temp, sep = "\t"), sep = "\n", file = myOutput)
-		close(myOutput)
 	}
 	else
 	{
@@ -303,12 +299,11 @@ if(length(myLocations) > 0)
 		myLocations2$V2<-as.numeric(as.character(myLocations2$V2))
 		myLocations2$V3<-as.numeric(as.character(myLocations2$V3))
 		myLocations2<-myLocations2[order(myLocations2$V1,myLocations2$V2,myLocations2$V3),]
-		myOutput<-file(bedFileInsertions, "w")
 		temp<-paste(myLocations2[,4],myLocations2[,5], myLocations2[,6],myLocations2[,7],myLocations2[,8],myLocations2[,9], sep = ";")
 		cat(paste(myLocations2[,1],myLocations2[,2], myLocations2[,3], temp, sep = "\t"), sep = "\n", file = myOutput)
-		close(myOutput)
 	}
 }
+close(myOutput)
 
 #myOutput<-file(outputFile, "w")
 #cat(paste("chrom", "start", "end", "tsd_length", "strand", "teName", "strain", "nReads","insertion", sep = "\t"), sep = "\n", file = myOutput)
