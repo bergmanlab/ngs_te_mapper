@@ -1,3 +1,5 @@
+# An improved version of this tool is available here: https://github.com/bergmanlab/ngs_te_mapper2
+
 ngs_te_mapper
 =============
 
